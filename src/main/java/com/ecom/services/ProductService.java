@@ -1,5 +1,5 @@
 package com.ecom.services;
-import com.ecom.dao.ProductDAO;
+import com.ecom.dao.ProductDao;
 import com.ecom.models.Product;
 import java.sql.SQLException;
 import java.util.Comparator;
@@ -9,16 +9,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ProductService {
-    private ProductDAO productDAO;
+    private ProductDao productDAO;
     private Map<Integer, Product> productCache;
 
     public ProductService() {
-        this.productDAO = new ProductDAO();
+        this.productDAO = new ProductDao();
         this.productCache = new HashMap<>();
     }
 
     // For testing injection
-    public ProductService(ProductDAO productDAO) {
+    public ProductService(ProductDao productDAO) {
         this.productDAO = productDAO;
         this.productCache = new HashMap<>();
     }
