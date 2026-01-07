@@ -1,9 +1,12 @@
 package com.ecom.controllers;
 
 // LoginController.java
+import com.ecom.utils.NavigationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.event.ActionEvent;
+
+import java.io.IOException;
 
 public class LoginController {
 
@@ -39,6 +42,11 @@ public class LoginController {
         // Example: authenticate(email, password)
         showAlert(Alert.AlertType.INFORMATION, "Success",
                 "Login successful!\nEmail: " + email);
+        try {
+            NavigationUtils.navigate("product");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @FXML

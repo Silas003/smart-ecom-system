@@ -1,5 +1,7 @@
 package com.ecom;
 import java.io.IOException;
+
+import com.ecom.utils.NavigationUtils;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,16 +11,18 @@ import javafx.stage.Stage;
 public class Main extends Application{
     @Override
     public void start(Stage primaryStage){
+        NavigationUtils.setStage(primaryStage);
+
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/productmanagement.fxml"));
-            Scene scene = new Scene(root);
-            primaryStage.setTitle("Smart E-Commerce System");
-            primaryStage.setScene(scene);
-            primaryStage.show();
+            NavigationUtils.navigate("login");
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        primaryStage.setTitle("Login");
+        primaryStage.show();
     }
+
     public static void main(String[] args) {
         launch(args);
     }
