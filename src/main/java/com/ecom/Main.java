@@ -1,9 +1,25 @@
 package com.ecom;
+import java.io.IOException;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-import com.ecom.services.OrderService;
-
-public class Main {
+public class Main extends Application{
+    @Override
+    public void start(Stage primaryStage){
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/productmanagement.fxml"));
+            Scene scene = new Scene(root);
+            primaryStage.setTitle("Smart E-Commerce System");
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public static void main(String[] args) {
-        OrderService.main(args);
+        launch(args);
     }
 }

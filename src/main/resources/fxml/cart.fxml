@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ecom.controllers.CartController" style="-fx-background-color: #f5f5f5;">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 20; -fx-background-color: white;">
+            <Label text="Shopping Cart" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true">
+            <HBox spacing="20" style="-fx-padding: 20;">
+                <!-- Cart Items -->
+                <VBox fx:id="cartItemsContainer" spacing="15" HBox.hgrow="ALWAYS" prefWidth="600">
+                    <!-- Example cart item -->
+                    <HBox spacing="15" alignment="CENTER_LEFT"
+                          style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8;">
+                        <Label text="[Image]" prefWidth="100" prefHeight="100"
+                               style="-fx-background-color: #e0e0e0; -fx-alignment: center;"/>
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="Product Name" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                            <Label text="99.99" style="-fx-text-fill: #007bff; -fx-font-size: 14px;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Quantity:"/>
+                                <Button text="-" prefWidth="30" prefHeight="30"/>
+                                <Label text="1" style="-fx-min-width: 30; -fx-alignment: center;"/>
+                                <Button text="+" prefWidth="30" prefHeight="30"/>
+                            </HBox>
+                        </VBox>
+                        <VBox alignment="CENTER_RIGHT" spacing="10">
+                            <Label text="99.99" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+                            <Button text="Remove" style="-fx-text-fill: #dc3545; -fx-background-color: transparent; -fx-cursor: hand;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- Order Summary -->
+                <VBox spacing="15" prefWidth="300" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+                    <Label text="Order Summary" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+                    <Separator/>
+
+                    <HBox>
+                        <Label text="Subtotal:" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="subtotalLabel" text="0.00" style="-fx-font-weight: bold;"/>
+                    </HBox>
+
+                    <HBox>
+                        <Label text="Tax:" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="taxLabel" text="0.00"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <HBox>
+                        <Label text="Total:" HBox.hgrow="ALWAYS" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                        <Label fx:id="totalLabel" text="0.00" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #007bff;"/>
+                    </HBox>
+
+                    <Button text="Proceed to Checkout" onAction="#handleCheckout" prefHeight="45"
+                            style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold;
+                                  -fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 16px;"/>
+
+                    <Button text="Continue Shopping" onAction="#handleContinueShopping" prefHeight="40"
+                            style="-fx-background-color: transparent; -fx-border-color: #007bff; -fx-text-fill: #007bff;
+                                  -fx-border-radius: 5; -fx-cursor: hand;"/>
+                </VBox>
+            </HBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
