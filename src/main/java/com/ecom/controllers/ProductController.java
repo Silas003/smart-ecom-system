@@ -1,10 +1,14 @@
 package com.ecom.controllers;
 
+import com.ecom.utils.NavigationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.io.IOException;
+
 public class ProductController {
 
     @FXML private TextField searchField;
@@ -52,7 +56,11 @@ public class ProductController {
 
     @FXML
     private void handleViewCart() {
-        // Navigate to cart page
+        try {
+            NavigationUtils.navigate("cart");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void loadProducts() {

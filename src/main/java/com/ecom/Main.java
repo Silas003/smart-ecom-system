@@ -14,12 +14,12 @@ public class Main extends Application{
         NavigationUtils.setStage(primaryStage);
 
         try {
-            NavigationUtils.navigate("login");
+            NavigationUtils.navigate("cart");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        primaryStage.setTitle("Login");
+        primaryStage.setTitle("ecom");
         primaryStage.show();
     }
 
