@@ -1,7 +1,8 @@
 package com.ecom.dao;
 import java.sql.*;
 import java.util.Map;
-
+import com.ecom.models.Product;
+import com.ecom.utils.DatabaseUtils;
 public class OrderDao {
     
   /**
@@ -16,7 +17,7 @@ public class OrderDao {
     ResultSet generatedKeys = null;
 
     try {
-      conn = DatabaseConnection.getInstance().getConnection();
+      conn = DatabaseUtils.getConnection();
       // 1. Start Transaction
       conn.setAutoCommit(false);
 
@@ -97,6 +98,8 @@ public class OrderDao {
         }
       }
       throw e; // Re-throw to notify caller
+    } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
     } finally {
       // 5. Reset AutoCommit and Close Resources
       if (conn != null) conn.setAutoCommit(true);
