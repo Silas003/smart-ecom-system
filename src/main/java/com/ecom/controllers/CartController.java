@@ -41,15 +41,16 @@ public class CartController {
         }
     }
 
-//    @FXML
-//    private void increase(){
-//        item.setText(String.format("%d",cartItem++));
-//    }
-//
-//    @FXML
-//    private void decrease(){
-//        item.setText(String.format("%d",cartItem--));
-//    }
+    @FXML
+    private void increase(){
+        item.setText(String.format("%d",++cartItem));
+    }
+
+    @FXML
+    private void decrease(){
+        if(cartItem>0)
+        item.setText(String.format("%d",cartItem--));
+    }
 
     private void updateCartSummary() {
         // Calculate totals

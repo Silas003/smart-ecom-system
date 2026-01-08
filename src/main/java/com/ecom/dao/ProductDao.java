@@ -8,7 +8,7 @@ public class ProductDao {
 
   public void create(Product product) throws SQLException {
     String sql =
-        "INSERT INTO products (category_id, name, price, stock_quantity) VALUES (?, ?, ?, ?)";
+        "INSERT INTO products (category_id, name, price, brand,stock_quantity) VALUES (?, ?, ?, ?)";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 

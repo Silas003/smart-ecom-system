@@ -14,7 +14,7 @@ public class Main extends Application{
         NavigationUtils.setStage(primaryStage);
 
         try {
-            NavigationUtils.navigate("cart");
+            NavigationUtils.navigate("login");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -84,7 +84,7 @@ public class CategoryDao {
   }
 
   private Category mapResultSetToCategory(ResultSet rs) throws SQLException {
-    return new Category(rs.getInt("category_id"), rs.getString("name"));
+    return new Category(rs.getInt("id"), rs.getString("name"));
   }
     
 }
