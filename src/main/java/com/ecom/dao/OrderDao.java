@@ -1,7 +1,11 @@
 package com.ecom.dao;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import com.ecom.models.Product;
+import com.ecom.models.Order;
+import com.ecom.models.OrderItem;
 import com.ecom.utils.DatabaseUtils;
 public class OrderDao {
     
@@ -108,5 +112,90 @@ public class OrderDao {
       if (itemStmt != null) itemStmt.close();
       if (stockStmt != null) stockStmt.close();
     }
+  }
+
+  public List<Order> findByUserId(int userId) throws SQLException {
+    List<Order> orders = new ArrayList<>();
+    String sql = "SELECT order_id, user_id, order_date, total_amount FROM orders WHERE user_id = ? ORDER BY order_date DESC";
+    try (Connection conn = DatabaseUtils.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+      stmt.setInt(1, userId);
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          orders.add(mapResultSetToOrder(rs));
+        }
+      }
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    return orders;
+  }
+
+  public Order findById(int orderId) throws SQLException {
+    String sql = "SELECT order_id, user_id, order_date, total_amount FROM orders WHERE order_id = ?";
+    try (Connection conn = DatabaseUtils.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+      stmt.setInt(1, orderId);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+          return mapResultSetToOrder(rs);
+        }
+      }
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    return null;
+  }
+
+  public List<Order> findAll() throws SQLException {
+    List<Order> orders = new ArrayList<>();
+    String sql = "SELECT order_id, user_id, order_date, total_amount FROM orders ORDER BY order_date DESC";
+    try (Connection conn = DatabaseUtils.getConnection();
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql)) {
+      while (rs.next()) {
+        orders.add(mapResultSetToOrder(rs));
+      }
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    return orders;
+  }
+
+  public List<OrderItem> findOrderItemsByOrderId(int orderId) throws SQLException {
+    List<OrderItem> items = new ArrayList<>();
+    String sql = "SELECT id, order_id, product_id, quantity, price_at_purchase FROM order_items WHERE order_id = ?";
+    try (Connection conn = DatabaseUtils.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+      stmt.setInt(1, orderId);
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          items.add(mapResultSetToOrderItem(rs));
+        }
+      }
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    return items;
+  }
+
+  private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+    Order order = new Order();
+    order.setOrderId(rs.getInt("order_id"));
+    order.setUserId(rs.getInt("user_id"));
+    order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
+    order.setTotalAmount(rs.getDouble("total_amount"));
+    return order;
+  }
+
+  private OrderItem mapResultSetToOrderItem(ResultSet rs) throws SQLException {
+    OrderItem item = new OrderItem(
+        rs.getInt("product_id"),
+        rs.getInt("quantity"),
+        rs.getDouble("price_at_purchase")
+    );
+    item.setId(rs.getInt("id"));
+    item.setOrderId(rs.getInt("order_id"));
+    return item;
   }
 }

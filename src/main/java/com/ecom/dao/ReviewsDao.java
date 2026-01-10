@@ -1,103 +1,134 @@
 package com.ecom.dao;
 
+import com.ecom.models.Reviews;
+import com.ecom.utils.DatabaseUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReviewsDao {
-    private static Connection connection = null;
 
-    public ReviewsDao(Connection conn) {
-       connection = conn;
-    }
-
-    public static void create( int userId,int productId, String description,int stars){
-        String sql = "insert into reviews(user_id,product_id,stars,description) values(?,?,?,?)";
-        try(Connection conn = connection){
+    public static void create(int userId, int productId, String description, int stars) throws SQLException {
+        String sql = "INSERT INTO reviews(user_id, product_id, stars, description) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseUtils.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setString(4,description);
-            preparedStatement.setInt(1,userId);
-            preparedStatement.setInt(2,productId);
-            preparedStatement.setInt(3,stars);
+            preparedStatement.setInt(1, userId);
+            preparedStatement.setInt(2, productId);
+            preparedStatement.setInt(3, stars);
+            preparedStatement.setString(4, description);
             int rd = preparedStatement.executeUpdate();
-            if(rd > 0)
-                System.out.println("review created successfully.");
-
-        } catch (SQLException e) {
+            if (rd > 0) {
+                System.out.println("Review created successfully.");
+            }
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    public static void read(){
-        String sql = "select * from reviews";
-        try(Connection conn = connection){
+    public static List<Reviews> findAll() throws SQLException {
+        List<Reviews> reviews = new ArrayList<>();
+        String sql = "SELECT id, user_id, product_id, stars, description FROM reviews";
+        try (Connection conn = DatabaseUtils.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()){
-                System.out.println("User ID: " + rs.getInt("product_id"));
-                System.out.println("Username: " + rs.getString("username"));
-                System.out.println("Phone: " + rs.getString("phone"));
-                System.out.println("Email: " + rs.getString("email"));
-                System.out.println("---------------------------");
+            while (rs.next()) {
+                reviews.add(mapResultSetToReview(rs));
             }
-
-        } catch (SQLException e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
+        return reviews;
     }
 
-    public static void update(int stars,int id){
-        String sql = "update reviews set stars=? where id=?";
-        try(Connection conn = connection){
+    public static List<Reviews> findByProductId(int productId) throws SQLException {
+        List<Reviews> reviews = new ArrayList<>();
+        String sql = "SELECT id, user_id, product_id, stars, description FROM reviews WHERE product_id = ?";
+        try (Connection conn = DatabaseUtils.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
-
-            preparedStatement.setInt(1,stars);
-            preparedStatement.setInt(2,id);
-            int rd = preparedStatement.executeUpdate();
-            if(rd > 0)
-                System.out.println("review updated successfully.");
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public static void findByUserId(int id){
-        String sql = "select * from reviews where user_id=?";
-        try(Connection conn = connection){
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setInt(1,id);
+            preparedStatement.setInt(1, productId);
             ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()){
-                System.out.println("User ID: " + rs.getInt("product_id"));
-                System.out.println("Username: " + rs.getString("username"));
-                System.out.println("Phone: " + rs.getString("phone"));
-                System.out.println("Email: " + rs.getString("email"));
-                System.out.println("---------------------------");
+            while (rs.next()) {
+                reviews.add(mapResultSetToReview(rs));
             }
-
-        } catch (SQLException e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
+        return reviews;
     }
 
-    public static void delete(int id){
-        String sql = "delete from reviews where id=?";
-        try(Connection conn = connection){
+    public static List<Reviews> findByUserId(int userId) throws SQLException {
+        List<Reviews> reviews = new ArrayList<>();
+        String sql = "SELECT id, user_id, product_id, stars, description FROM reviews WHERE user_id = ?";
+        try (Connection conn = DatabaseUtils.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setInt(1,id);
-            int rd = preparedStatement.executeUpdate();
-            if(rd > 0)
-                System.out.println("review deleted successfully.");
-
-        } catch (SQLException e) {
+            preparedStatement.setInt(1, userId);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                reviews.add(mapResultSetToReview(rs));
+            }
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+        return reviews;
+    }
 
+    public static Reviews findById(int id) throws SQLException {
+        String sql = "SELECT id, user_id, product_id, stars, description FROM reviews WHERE id = ?";
+        try (Connection conn = DatabaseUtils.getConnection()) {
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, id);
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToReview(rs);
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public static void update(int id, int stars, String description) throws SQLException {
+        String sql = "UPDATE reviews SET stars = ?, description = ? WHERE id = ?";
+        try (Connection conn = DatabaseUtils.getConnection()) {
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, stars);
+            preparedStatement.setString(2, description);
+            preparedStatement.setInt(3, id);
+            int rd = preparedStatement.executeUpdate();
+            if (rd > 0) {
+                System.out.println("Review updated successfully.");
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void delete(int id) throws SQLException {
+        String sql = "DELETE FROM reviews WHERE id = ?";
+        try (Connection conn = DatabaseUtils.getConnection()) {
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, id);
+            int rd = preparedStatement.executeUpdate();
+            if (rd > 0) {
+                System.out.println("Review deleted successfully.");
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Reviews mapResultSetToReview(ResultSet rs) throws SQLException {
+        // Map database fields (stars, description) to model fields (rating, comment)
+        Reviews review = new Reviews(
+            rs.getInt("id"),
+            rs.getInt("user_id"),
+            rs.getInt("product_id"),
+            rs.getInt("stars"), // stars -> rating
+            rs.getString("description") // description -> comment
+        );
+        return review;
     }
 }

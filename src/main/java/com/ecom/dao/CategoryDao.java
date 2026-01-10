@@ -26,7 +26,7 @@ public class CategoryDao {
   }
 
   public Category findById(int id) throws SQLException {
-    String sql = "SELECT * FROM categories WHERE category_id = ?";
+    String sql = "SELECT * FROM categories WHERE id = ?";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -59,7 +59,7 @@ public class CategoryDao {
   }
 
   public void update(Category category) throws SQLException {
-    String sql = "UPDATE categories SET name = ? WHERE category_id = ?";
+    String sql = "UPDATE categories SET name = ? WHERE id = ?";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
 

@@ -27,9 +27,9 @@
                             <Label text="99.99" style="-fx-text-fill: #007bff; -fx-font-size: 14px;"/>
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <Label text="Quantity:"/>
-                                <Button text="-" prefWidth="30" prefHeight="30" onAction="#decrease"/>
+                                <!-- <Button text="-" prefWidth="30" prefHeight="30" onAction="#decrease"/>
                                 <Label fx:id="item" style="-fx-min-width: 30; -fx-alignment: center;"/>
-                                <Button text="+" prefWidth="30" prefHeight="30" onAction="#increase"/>
+                                <Button text="+" prefWidth="30" prefHeight="30" onAction="#increase"/> -->
                             </HBox>
                         </VBox>
                         <VBox alignment="CENTER_RIGHT" spacing="10">

@@ -1,12 +1,15 @@
 package com.ecom.controllers;
 
-// LoginController.java
+import com.ecom.models.User;
+import com.ecom.services.UserService;
+import com.ecom.services.SessionService;
 import com.ecom.utils.NavigationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.event.ActionEvent;
 
 import java.io.IOException;
+
 
 public class LoginController {
 
@@ -30,37 +33,46 @@ public class LoginController {
 
     @FXML
     private void handleLogin(ActionEvent event) {
-        String email = emailField.getText();
+        String email = emailField.getText().trim();
         String password = passwordField.getText();
 
         if (email.isEmpty() || password.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all fields");
             return;
         }
+        
+        // Validate email format
+        if (!email.contains("@")) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Please enter a valid email address");
+            return;
+        }
 
-        // Add your authentication logic here
-        // Example: authenticate(email, password)
-        showAlert(Alert.AlertType.INFORMATION, "Success",
-                "Login successful!\nEmail: " + email);
-        try {
-            NavigationUtils.navigate("product");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        // Authenticate user
+        User user = UserService.login(email, password);
+        if(user != null){
+            // Store user in session
+            SessionService.getInstance().setCurrentUser(user);
+            showAlert(Alert.AlertType.INFORMATION, "Success",
+                    "Login successful!\nEmail: " + email);
+            try {
+                if (user.getRole().equalsIgnoreCase("admin")) {
+                    NavigationUtils.navigate("adminDashboard");
+                } else {
+                    NavigationUtils.navigate("product");
+                }   
+            } catch (IOException e) {
+                // showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
-
-    @FXML
-    private void handleForgotPassword(ActionEvent event) {
-        // Navigate to forgot password page
-        showAlert(Alert.AlertType.INFORMATION, "Forgot Password",
-                "Redirect to password reset page");
-    }
-
     @FXML
     private void handleSignup(ActionEvent event) {
-        // Navigate to signup page
-        showAlert(Alert.AlertType.INFORMATION, "Sign Up",
-                "Redirect to registration page");
+       try {
+        NavigationUtils.navigate("signup");
+       } catch (IOException e) {
+        System.out.println(e.getMessage());
+       }
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

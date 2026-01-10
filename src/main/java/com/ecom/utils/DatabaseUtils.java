@@ -6,9 +6,10 @@ import java.sql.*;
 public class DatabaseUtils {
     private static final String driver = "org.postgresql.Driver";
     private static final String url ="jdbc:postgresql://localhost:5432/smartEcom";
-    private static final String username = System.getenv("DB_USERNAME");
-    private static final String password = System.getenv("DB_PASSWORD");
-
+    // private static final String username = System.getenv("DB_USERNAME");
+    // private static final String password = System.getenv("DB_PASSWORD");
+    private static final String username = "postgres";
+    private static final String password = "Drake@7890";
     public static Connection getConnection() throws ClassNotFoundException,SQLException, PSQLException {
         Class.forName(driver);
         Connection connection = DriverManager.getConnection(url,username,password);

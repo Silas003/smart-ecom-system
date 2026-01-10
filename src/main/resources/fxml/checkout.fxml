@@ -102,7 +102,7 @@
 
                     <HBox>
                         <Label text="Subtotal:" HBox.hgrow="ALWAYS"/>
-                        <Label text=" 99.99"/>
+                        <Label fx:id="subtotalLabel" text=" 0.00"/>
                     </HBox>
 
                     <HBox>
@@ -112,7 +112,7 @@
 
                     <HBox>
                         <Label text="Tax:" HBox.hgrow="ALWAYS"/>
-                        <Label text=" 8.00"/>
+                        <Label fx:id="taxLabel" text=" 0.00"/>
                     </HBox>
 
                     <Separator/>
