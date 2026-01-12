@@ -3,68 +3,95 @@ import com.ecom.dao.ProductDao;
 import com.ecom.models.Product;
 import java.sql.SQLException;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class ProductService {
-    private ProductDao productDAO;
-    private Map<Integer, Product> productCache;
+    private final ProductDao productDAO;
+    private final Map<Integer, Product> productCache;
+    private final Map<String, List<Product>> listCache; // key: q|page|pageSize|sort|asc
+
+    private static final ProductService INSTANCE = new ProductService(new ProductDao());
+    public static ProductService getInstance() { return INSTANCE; }
 
     public ProductService() {
         this.productDAO = new ProductDao();
-        this.productCache = new HashMap<>();
+        this.productCache = new ConcurrentHashMap<>();
+        this.listCache = new ConcurrentHashMap<>();
     }
 
-    // For testing injection
+    // constructor for injection/testing
     public ProductService(ProductDao productDAO) {
         this.productDAO = productDAO;
-        this.productCache = new HashMap<>();
+        this.productCache = new ConcurrentHashMap<>();
+        this.listCache = new ConcurrentHashMap<>();
+    }
+
+    private String cacheKey(String q, int page, int pageSize, String sortBy, boolean asc) {
+        return (q == null ? "" : q.toLowerCase()) + "|" + page + "|" + pageSize + "|" + sortBy + "|" + asc;
+    }
+
+    public List<Product> search(String q, int page, int pageSize, String sortBy, boolean asc, boolean useCache) throws SQLException {
+        String key = cacheKey(q, page, pageSize, sortBy, asc);
+        if (useCache && listCache.containsKey(key)) {
+            recordCacheHit();
+            return listCache.get(key);
+        }
+        recordCacheMiss();
+        int offset = page * pageSize;
+        List<Product> results = productDAO.search(q, offset, pageSize, sortBy, asc);
+        listCache.put(key, results);
+        results.forEach(p -> productCache.put(p.getProductId(), p));
+        return results;
+    }
+
+    // Simple cache metrics
+    private long cacheHits = 0;
+    private long cacheMisses = 0;
+
+    private synchronized void recordCacheHit() { cacheHits++; }
+    private synchronized void recordCacheMiss() { cacheMisses++; }
+
+    public long getCacheHits() { return cacheHits; }
+    public long getCacheMisses() { return cacheMisses; }
+
+    public int getListCacheSize() { return listCache.size(); }
+    public int getProductCacheSize() { return productCache.size(); }
+
+    public int count(String q) throws SQLException {
+        return productDAO.count(q);
+    }
+
+    public Product getProductById(int id) throws SQLException {
+        if (productCache.containsKey(id)) return productCache.get(id);
+        Product p = productDAO.findById(id);
+        if (p != null) productCache.put(id, p);
+        return p;
     }
 
     public void createProduct(Product product) throws SQLException {
         productDAO.create(product);
-        productCache.put(product.getProductId(), product);
+        invalidateAll();
     }
 
-    public Product getProductById(int id) throws SQLException {
-        // 1. Check Cache
-        if (productCache.containsKey(id)) {
-            System.out.println("Cache Hit for Product ID: " + id);
-            return productCache.get(id);
-        }
+    public void updateProduct(Product product) throws SQLException {
+        productDAO.update(product);
+        productCache.put(product.getProductId(), product);
+        invalidateAll();
+    }
 
-
-        System.out.println("Cache Miss for Product ID: " + id + ". Querying DB...");
-        Product product = productDAO.findById(id);
-
-        // 3. Put in Cache
-        if (product != null) {
-            productCache.put(id, product);
-        }
-        return product;
+    public void deleteProduct(int id) throws SQLException {
+        productDAO.delete(id);
+        productCache.remove(id);
+        invalidateAll();
     }
 
     public List<Product> getAllProducts() throws SQLException {
         return productDAO.findAll();
     }
 
-    public void updateProduct(Product product) throws SQLException {
-        productDAO.update(product);
-        // Invalidate/Update Cache
-        productCache.put(product.getProductId(), product);
-        System.out.println("Cache Updated for Product ID: " + product.getProductId());
-    }
-
-    public void deleteProduct(int id) throws SQLException {
-        productDAO.delete(id);
-        // Remove from Cache
-        productCache.remove(id);
-        System.out.println("Cache Cleared for Product ID: " + id);
-    }
-
-    // Sorting Algorithms
     public List<Product> sortProductsByPrice(List<Product> products, boolean ascending) {
         Comparator<Product> priceComparator = Comparator.comparingDouble(Product::getPrice);
         if (!ascending) {
@@ -74,9 +101,7 @@ public class ProductService {
     }
 
     public List<Product> searchProductsByName(String query) throws SQLException {
-        // For now, we fetch all and filter in memory (or we could add a DAO method for LIKE query)
-        // Instructions say: "Query uses SQL LIKE operator OR in-memory filtering."
-        // Let's do in-memory for now as we have getAllProducts
+        // keep behaviour: fetch all and filter in-memory (backwards compatible)
         List<Product> allProducts = getAllProducts();
         return allProducts.stream()
                 .filter(p -> p.getName().toLowerCase().contains(query.toLowerCase()))
@@ -85,5 +110,10 @@ public class ProductService {
 
     public void clearCache() {
         productCache.clear();
+        listCache.clear();
+    }
+
+    private void invalidateAll() {
+        clearCache();
     }
 }
