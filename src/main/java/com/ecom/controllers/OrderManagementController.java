@@ -4,7 +4,8 @@ import com.ecom.models.Order;
 import com.ecom.models.OrderItem;
 import com.ecom.models.User;
 import com.ecom.dao.OrderDao;
-import com.ecom.dao.UsersDao;
+import com.ecom.services.UserService;
+import com.ecom.exceptions.DaoException;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -36,7 +37,7 @@ public class OrderManagementController {
         orderDao = new OrderDao();
         loadUsers();
         
-        // Setup table columns
+
         orderIdColumn.setCellValueFactory(new PropertyValueFactory<>("orderId"));
         dateColumn.setCellValueFactory(cellData -> {
             Order order = cellData.getValue();
@@ -64,11 +65,11 @@ public class OrderManagementController {
 
     private void loadUsers() {
         try {
-            List<User> users = UsersDao.findAll();
+            List<User> users = UserService.findAll();
             for (User user : users) {
                 userMap.put(user.getUserId(), user.getUsername());
             }
-        } catch (Exception e) {
+        } catch (DaoException e) {
             System.err.println("Error loading users: " + e.getMessage());
         }
     }
@@ -90,7 +91,7 @@ public class OrderManagementController {
 
     @FXML
     private void handleUpdateStatus() {
-        // Note: This would require adding a status field to the Order model and database
+
         showAlert(Alert.AlertType.INFORMATION, "Info", "Status update functionality requires order status field in database.");
     }
 

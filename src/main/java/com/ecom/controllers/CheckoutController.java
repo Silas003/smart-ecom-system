@@ -43,13 +43,13 @@ public class CheckoutController {
         productService = new ProductService();
         sessionService = SessionService.getInstance();
         
-        // Check if user is logged in
+
         if (!sessionService.isLoggedIn()) {
             showAlert(Alert.AlertType.WARNING, "Not Logged In", "Please log in to checkout.");
             try {
                 NavigationUtils.navigate("login");
             } catch (IOException e) {
-                // Handle error
+
             }
             return;
         }
@@ -62,7 +62,6 @@ public class CheckoutController {
 
     @FXML
     private void handlePlaceOrder() {
-        // Validate all fields
         if (fullNameField.getText().trim().isEmpty() || 
             emailField.getText().trim().isEmpty() ||
             addressField.getText().trim().isEmpty() ||
@@ -73,7 +72,7 @@ public class CheckoutController {
             return;
         }
 
-        // Validate payment method
+
         if (paymentMethodCombo.getValue() == null) {
             showAlert(Alert.AlertType.ERROR, "Error", "Please select a payment method");
             return;
@@ -94,7 +93,6 @@ public class CheckoutController {
             return;
         }
 
-        // Convert cart to Map<Product, Integer> for OrderService
         Map<Product, Integer> cartItems = new HashMap<>();
         Map<Integer, Integer> cart = cartService.getCart();
         
@@ -110,7 +108,7 @@ public class CheckoutController {
             }
         }
 
-        // Place order
+
         try {
             int userId = sessionService.getCurrentUserId();
             if (userId == 0) {
@@ -118,7 +116,7 @@ public class CheckoutController {
                 try {
                     NavigationUtils.navigate("login");
                 } catch (IOException e) {
-                    // Handle error
+
                 }
                 return;
             }
@@ -159,7 +157,7 @@ public class CheckoutController {
 
     private void updateOrderSummary() {
         if (subtotalLabel == null || taxLabel == null || orderTotalLabel == null) {
-            return; // FXML not fully loaded yet
+            return;
         }
         
         Map<Integer, Integer> cart = cartService.getCart();

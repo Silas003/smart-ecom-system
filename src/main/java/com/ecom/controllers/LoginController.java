@@ -4,11 +4,13 @@ import com.ecom.models.User;
 import com.ecom.services.UserService;
 import com.ecom.services.SessionService;
 import com.ecom.utils.NavigationUtils;
+import com.ecom.utils.ValidationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.event.ActionEvent;
 
 import java.io.IOException;
+import com.ecom.exceptions.*;
 
 
 public class LoginController {
@@ -36,34 +38,41 @@ public class LoginController {
         String email = emailField.getText().trim();
         String password = passwordField.getText();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all fields");
-            return;
-        }
-        
-        // Validate email format
-        if (!email.contains("@")) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please enter a valid email address");
+        try {
+
+            ValidationUtils.requireNonEmpty(email, "email");
+            ValidationUtils.requireNonEmpty(password, "password");
+            ValidationUtils.requireEmail(email, "email");
+        } catch (ValidationException ve) {
+            showAlert(Alert.AlertType.ERROR, "Validation error", ve.getMessage());
             return;
         }
 
-        // Authenticate user
-        User user = UserService.login(email, password);
-        if(user != null){
-            // Store user in session
-            SessionService.getInstance().setCurrentUser(user);
-            showAlert(Alert.AlertType.INFORMATION, "Success",
-                    "Login successful!\nEmail: " + email);
-            try {
-                if (user.getRole().equalsIgnoreCase("admin")) {
-                    NavigationUtils.navigate("adminDashboard");
-                } else {
-                    NavigationUtils.navigate("product");
-                }   
-            } catch (IOException e) {
-                // showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
-                e.printStackTrace();
+
+        try {
+            User user = UserService.login(email, password);
+            if(user != null){
+
+                SessionService.getInstance().setCurrentUser(user);
+                showAlert(Alert.AlertType.INFORMATION, "Success",
+                        "Login successful!\nEmail: " + email);
+                try {
+                    if (user.getRole().equalsIgnoreCase("admin")) {
+                        NavigationUtils.navigate("adminDashboard");
+                    } else {
+                        NavigationUtils.navigate("product");
+                    }
+                } catch (IOException e) {
+                     showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
+
+                }
             }
+        } catch (InvalidInputException iie) {
+            showAlert(Alert.AlertType.ERROR, "Validation error", iie.getMessage());
+        } catch (AuthenticationException ae) {
+            showAlert(Alert.AlertType.ERROR, "Authentication failed", ae.getMessage());
+        } catch (DaoException de) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Login failed due to a server error.");
         }
     }
     @FXML
@@ -75,18 +84,7 @@ public class LoginController {
        }
     }
 
-    @FXML
-    private void handleBack(ActionEvent event) {
-        try {
-            if (com.ecom.utils.NavigationUtils.canGoBack()) {
-                com.ecom.utils.NavigationUtils.goBack();
-            } else {
-                // No previous screen: do nothing or navigate to default
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);

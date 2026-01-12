@@ -142,7 +142,7 @@ public class ProductController {
             default: sortBy = ""; break;
         }
 
-        // make copies so they are effectively final for the Task
+
         final String sSortBy = sortBy;
         final boolean sAsc = asc;
 
@@ -189,7 +189,7 @@ public class ProductController {
     }
 
     private void filterAndDisplayProducts() {
-        // Not used with pagination; kept for compatibility
+
         loadProductsAsync(0);
     }
 
@@ -223,28 +223,28 @@ public class ProductController {
         card.setPrefWidth(250);
         card.setAlignment(Pos.TOP_CENTER);
 
-        // Product image placeholder
+
         Label imagePlaceholder = new Label("[Product Image]");
         imagePlaceholder.setPrefHeight(200);
         imagePlaceholder.setPrefWidth(250);
         imagePlaceholder.setStyle("-fx-background-color: #e0e0e0; -fx-alignment: center;");
 
-        // Product name
+
         Label nameLabel = new Label(product.getName());
         nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
         nameLabel.setWrapText(true);
 
-        // Product price
+
         Label priceLabel = new Label(String.format("$%.2f", product.getPrice()));
         priceLabel.setStyle("-fx-text-fill: #007bff; -fx-font-size: 18px; -fx-font-weight: bold;");
 
-        // Stock info
+
         Label stockLabel = new Label(product.getStockQuantity() > 0 ? 
             "In Stock" : "Out of Stock");
         stockLabel.setStyle(product.getStockQuantity() > 0 ? 
             "-fx-text-fill: #28a745;" : "-fx-text-fill: #dc3545;");
 
-        // Add to cart button
+
         Button addToCartBtn = new Button("Add to Cart");
         addToCartBtn.setPrefWidth(250);
         addToCartBtn.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; " +

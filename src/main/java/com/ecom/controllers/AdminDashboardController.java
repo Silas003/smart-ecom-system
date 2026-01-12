@@ -1,10 +1,12 @@
 package com.ecom.controllers;
 
 import com.ecom.dao.OrderDao;
-import com.ecom.dao.UsersDao;
 import com.ecom.models.Order;
 import com.ecom.models.User;
 import com.ecom.utils.NavigationUtils;
+import com.ecom.services.UserService;
+import com.ecom.exceptions.DaoException;
+import com.ecom.exceptions.InvalidInputException;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -54,10 +56,10 @@ public class AdminDashboardController {
         customerCol.setPrefWidth(200);
         customerCol.setCellValueFactory(cell -> {
             try {
-                User u = UsersDao.getUserById(cell.getValue().getUserId());
+                User u = UserService.getUserById(cell.getValue().getUserId());
                 String name = (u != null) ? u.getUsername() : "User #" + cell.getValue().getUserId();
                 return new javafx.beans.property.SimpleStringProperty(name);
-            } catch (Exception e) {
+            } catch (DaoException | InvalidInputException e) {
                 return new javafx.beans.property.SimpleStringProperty("User #" + cell.getValue().getUserId());
             }
         });
@@ -86,20 +88,16 @@ public class AdminDashboardController {
             @Override
             protected Void call() {
                 try {
-                    // Orders
                     List<Order> orders = orderDao.findAll();
                     totalOrders = orders.size();
                     totalSales = orders.stream().mapToDouble(Order::getTotalAmount).sum();
 
-                    // Customers
-                    List<User> users = UsersDao.findAll();
+                    List<User> users = UserService.findAll();
                     totalCustomers = users.stream().filter(user->user.getRole().equalsIgnoreCase("customer")).count();
 
 
-                    // Recent orders (most recent 10)
                     recentOrders = orders.stream().limit(10).collect(Collectors.toList());
 
-                    // Build last-7-days series
                     LocalDate today = LocalDate.now();
                     Map<LocalDate, Double> byDay = orders.stream()
                             .collect(Collectors.groupingBy(o -> o.getOrderDate().toLocalDate(), Collectors.summingDouble(Order::getTotalAmount)));
@@ -112,6 +110,8 @@ public class AdminDashboardController {
                     }
 
                 } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                } catch (DaoException e) {
                     throw new RuntimeException(e);
                 }
                 return null;

@@ -50,8 +50,8 @@ public class CartController {
         try {
             NavigationUtils.navigate("checkout");
         } catch (IOException e) {
-            // showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
-            e.printStackTrace();
+             showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
+
         }
     }
 
@@ -114,13 +114,12 @@ public class CartController {
                       "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // Product image placeholder
         Label imagePlaceholder = new Label("[Image]");
         imagePlaceholder.setPrefWidth(100);
         imagePlaceholder.setPrefHeight(100);
         imagePlaceholder.setStyle("-fx-background-color: #e0e0e0; -fx-alignment: center;");
 
-        // Product details
+
         VBox details = new VBox(5);
         details.setPrefWidth(300);
         
@@ -135,7 +134,7 @@ public class CartController {
 
         details.getChildren().addAll(nameLabel, priceLabel, stockLabel);
 
-        // Quantity controls
+
         HBox quantityBox = new HBox(10);
         quantityBox.setAlignment(Pos.CENTER);
         
@@ -157,12 +156,11 @@ public class CartController {
 
         quantityBox.getChildren().addAll(decreaseBtn, quantityLabel, increaseBtn);
 
-        // Total price
+
         Label totalPriceLabel = new Label(String.format("$%.2f", product.getPrice() * quantity));
         totalPriceLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
         totalPriceLabel.setPrefWidth(100);
 
-        // Remove button
         Button removeBtn = new Button("Remove");
         removeBtn.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white; -fx-cursor: hand;");
         removeBtn.setOnAction(e -> handleRemoveItem(product.getProductId()));
@@ -173,7 +171,7 @@ public class CartController {
 
     private void updateCartSummary() {
         if (subtotalLabel == null || taxLabel == null || totalLabel == null) {
-            return; // FXML not fully loaded yet
+            return;
         }
         
         Map<Integer, Integer> cart = cartService.getCart();
@@ -190,7 +188,7 @@ public class CartController {
             }
         }
 
-        double tax = subtotal * 0.08; // 8% tax
+        double tax = subtotal * 0.08;
         double total = subtotal + tax;
 
         subtotalLabel.setText(String.format("$%.2f", subtotal));
@@ -212,7 +210,6 @@ public class CartController {
             if (com.ecom.utils.NavigationUtils.canGoBack()) {
                 com.ecom.utils.NavigationUtils.goBack();
             } else {
-                // default fallback
                 NavigationUtils.navigate("product");
             }
         } catch (Exception e) {

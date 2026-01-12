@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import com.ecom.utils.ValidationUtils;
+import com.ecom.exceptions.DaoException;
+import com.ecom.exceptions.ValidationException;
+
 public class ProductService {
     private final ProductDao productDAO;
     private final Map<Integer, Product> productCache;
@@ -71,25 +75,50 @@ public class ProductService {
         return p;
     }
 
-    public void createProduct(Product product) throws SQLException {
-        productDAO.create(product);
-        invalidateAll();
+    public void createProduct(Product product) throws ValidationException, DaoException {
+        if (product == null) throw new ValidationException("Product is required");
+        String name = product.getName();
+        ValidationUtils.requireNonEmpty(name, "product name");
+        if (product.getPrice() < 0) throw new ValidationException("Price must be zero or positive", "price", product.getPrice());
+        if (product.getStockQuantity() < 0) throw new ValidationException("Stock quantity must be non-negative", "stockQuantity", product.getStockQuantity());
+        try {
+            productDAO.create(product);
+            invalidateAll();
+        } catch (SQLException e) {
+            throw new DaoException("Failed to create product", e);
+        }
     }
 
-    public void updateProduct(Product product) throws SQLException {
-        productDAO.update(product);
-        productCache.put(product.getProductId(), product);
-        invalidateAll();
+    public void updateProduct(Product product) throws ValidationException, DaoException {
+        if (product == null) throw new ValidationException("Product is required");
+        ValidationUtils.requireNonEmpty(product.getName(), "product name");
+        if (product.getPrice() < 0) throw new ValidationException("Price must be zero or positive", "price", product.getPrice());
+        if (product.getStockQuantity() < 0) throw new ValidationException("Stock quantity must be non-negative", "stockQuantity", product.getStockQuantity());
+        try {
+            productDAO.update(product);
+            productCache.put(product.getProductId(), product);
+            invalidateAll();
+        } catch (SQLException e) {
+            throw new DaoException("Failed to update product", e);
+        }
     }
 
-    public void deleteProduct(int id) throws SQLException {
-        productDAO.delete(id);
-        productCache.remove(id);
-        invalidateAll();
+    public void deleteProduct(int id) throws DaoException {
+        try {
+            productDAO.delete(id);
+            productCache.remove(id);
+            invalidateAll();
+        } catch (SQLException e) {
+            throw new DaoException("Failed to delete product", e);
+        }
     }
 
-    public List<Product> getAllProducts() throws SQLException {
-        return productDAO.findAll();
+    public List<Product> getAllProducts() throws DaoException {
+        try {
+            return productDAO.findAll();
+        } catch (SQLException e) {
+            throw new DaoException("Failed to fetch all products", e);
+        }
     }
 
     public List<Product> sortProductsByPrice(List<Product> products, boolean ascending) {
@@ -100,12 +129,16 @@ public class ProductService {
         return products.stream().sorted(priceComparator).collect(Collectors.toList());
     }
 
-    public List<Product> searchProductsByName(String query) throws SQLException {
+    public List<Product> searchProductsByName(String query) throws DaoException {
         // keep behaviour: fetch all and filter in-memory (backwards compatible)
-        List<Product> allProducts = getAllProducts();
-        return allProducts.stream()
-                .filter(p -> p.getName().toLowerCase().contains(query.toLowerCase()))
-                .collect(Collectors.toList());
+        try {
+            List<Product> allProducts = getAllProducts();
+            return allProducts.stream()
+                    .filter(p -> p.getName().toLowerCase().contains(query.toLowerCase()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new DaoException("Failed to search products", e);
+        }
     }
 
     public void clearCache() {
@@ -117,3 +150,4 @@ public class ProductService {
         clearCache();
     }
 }
+

@@ -7,13 +7,16 @@ import com.ecom.models.Product;
 import com.ecom.models.Order;
 import com.ecom.models.OrderItem;
 import com.ecom.utils.DatabaseUtils;
+import com.ecom.exceptions.DaoException;
+import com.ecom.exceptions.InsufficientInventoryException;
+
 public class OrderDao {
     
   /**
    * Performs a transactional order placement. 1. Inserts Order 2. Inserts OrderItems 3. Updates
    * Product Stock Rolls back if any step fails (e.g., insufficient stock).
    */
-  public boolean placeOrder(int userId, Map<Product, Integer> cartItems) throws SQLException {
+  public boolean placeOrder(int userId, Map<Product, Integer> cartItems) throws DaoException, InsufficientInventoryException {
     Connection conn = null;
     PreparedStatement orderStmt = null;
     PreparedStatement itemStmt = null;
@@ -22,16 +25,16 @@ public class OrderDao {
 
     try {
       conn = DatabaseUtils.getConnection();
-      // 1. Start Transaction
+
       conn.setAutoCommit(false);
 
-      // Calculate Total
+
       double totalAmount = 0;
       for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
         totalAmount += entry.getKey().getPrice() * entry.getValue();
       }
 
-      // 2. Insert Order
+
       String insertOrderSQL =
           "INSERT INTO orders (user_id, total_amount) VALUES (?, NOW(), ?)";
       orderStmt = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS);
@@ -81,7 +84,7 @@ public class OrderDao {
         int stockRows = stockStmt.executeUpdate();
 
         if (stockRows == 0) {
-          throw new SQLException("Insufficient stock for product: " + product.getName());
+          throw new InsufficientInventoryException(product.getProductId(), quantity, 0);
         }
       }
 
@@ -92,6 +95,16 @@ public class OrderDao {
       System.out.println("Transaction Committed Successfully. Order ID: " + orderId);
       return true;
 
+    } catch (InsufficientInventoryException e) {
+      if (conn != null) {
+        try {
+          System.err.println("Transaction failed due to insufficient inventory. Rolling back.");
+          conn.rollback();
+        } catch (SQLException ex) {
+          ex.printStackTrace();
+        }
+      }
+      throw e;
     } catch (SQLException e) {
       if (conn != null) {
         try {
@@ -101,14 +114,18 @@ public class OrderDao {
           ex.printStackTrace();
         }
       }
-      throw e; // Re-throw to notify caller
+      throw new DaoException("Database error while placing order", e);
     } finally {
       // 5. Reset AutoCommit and Close Resources
-      if (conn != null) conn.setAutoCommit(true);
-      if (generatedKeys != null) generatedKeys.close();
-      if (orderStmt != null) orderStmt.close();
-      if (itemStmt != null) itemStmt.close();
-      if (stockStmt != null) stockStmt.close();
+      try {
+        if (conn != null) conn.setAutoCommit(true);
+        if (generatedKeys != null) generatedKeys.close();
+        if (orderStmt != null) orderStmt.close();
+        if (itemStmt != null) itemStmt.close();
+        if (stockStmt != null) stockStmt.close();
+      } catch (SQLException e) {
+        throw new DaoException("Failed to clean up resources", e);
+      }
     }
   }
 

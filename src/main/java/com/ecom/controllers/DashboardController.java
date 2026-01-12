@@ -1,6 +1,9 @@
 package com.ecom.controllers;
 
 import com.ecom.dao.*;
+import com.ecom.exceptions.DaoException;
+import com.ecom.exceptions.InsufficientInventoryException;
+import com.ecom.exceptions.ValidationException;
 import com.ecom.models.*;
 import com.ecom.services.*;
 import com.ecom.utils.*;
@@ -53,7 +56,7 @@ public class DashboardController {
         cartList = FXCollections.observableArrayList();
         cartMap = new HashMap<>();
 
-        // Product Table Setup
+
         colId.setCellValueFactory(new PropertyValueFactory<>("productId"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
@@ -61,7 +64,7 @@ public class DashboardController {
         colCategory.setCellValueFactory(new PropertyValueFactory<>("categoryId"));
         productTable.setItems(productList);
 
-        // Cart Table Setup
+
         colCartName.setCellValueFactory(
                 cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getName()));
         colCartQty.setCellValueFactory(
@@ -78,14 +81,11 @@ public class DashboardController {
 
     private void loadData() {
         try {
-//            PerformanceTimer timer = new PerformanceTimer();
-//            timer.start();
+
             List<Product> products = productService.getAllProducts();
-//            long duration = timer.end();
-//            System.out.println("Load Data Time: " + PerformanceTimer.formatDuration(duration));
 
             productList.setAll(products);
-        } catch (SQLException e) {
+        } catch (DaoException e) {
             showError("Error loading data", e.getMessage());
         }
     }
@@ -103,17 +103,17 @@ public class DashboardController {
             return;
         }
 
-        // Check if already in cart and if we have enough stock
+
         int currentQtyInCart = cartMap.getOrDefault(selected, 0);
         if (currentQtyInCart >= selected.getStockQuantity()) {
             showWarning("Stock Limit", "You cannot add more than available stock.");
             return;
         }
 
-        // Add to Map
+
         cartMap.put(selected, currentQtyInCart + 1);
 
-        // Update UI List
+
         updateCartUI();
     }
 
@@ -128,7 +128,7 @@ public class DashboardController {
     }
 
     @FXML
-    private void handleCheckout() {
+    private void handleCheckout() throws InsufficientInventoryException, DaoException {
         if (cartMap.isEmpty()) {
             showWarning("Empty Cart", "Add items to cart before checking out.");
             return;
@@ -141,7 +141,7 @@ public class DashboardController {
             showInfo("Success", "Order placed successfully!");
             cartMap.clear();
             updateCartUI();
-            loadData(); // Refresh product stock
+            loadData();
         } else {
             showError("Checkout Failed", "Could not place order. Check stock or try again.");
         }
@@ -151,15 +151,12 @@ public class DashboardController {
     private void handleSearch() {
         String query = searchField.getText();
         try {
-//            PerformanceTimer timer = new PerformanceTimer();
-//            timer.start();
+
             List<Product> results = productService.searchProductsByName(query);
-//            long duration = timer.end();
-//            System.out.println("Search Time: " + PerformanceTimer.formatDuration(duration));
 
             productList.setAll(results);
-        } catch (SQLException e) {
-            showError("Search Error", e.getMessage());
+        } catch (DaoException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -187,8 +184,8 @@ public class DashboardController {
             try {
                 productService.deleteProduct(selected.getProductId());
                 productList.remove(selected);
-            } catch (SQLException e) {
-                showError("Delete Error", e.getMessage());
+            } catch (DaoException e) {
+                throw new RuntimeException(e);
             }
         } else {
             showWarning("No Selection", "Please select a product to delete.");
@@ -212,7 +209,7 @@ public class DashboardController {
         TextField nameField = new TextField();
         nameField.setPromptText("Product Name");
 
-        // Use Spinner for numeric input
+
         Spinner<Double> priceSpinner = new Spinner<>(0.01, 100000.0, 100.0, 1.0);
         priceSpinner.setEditable(true);
 
@@ -242,7 +239,7 @@ public class DashboardController {
 
                     @Override
                     public Category fromString(String string) {
-                        return null; // Not needed for read-only combo
+                        return null;
                     }
                 });
         categoryBox.getSelectionModel().selectFirst();
@@ -265,7 +262,7 @@ public class DashboardController {
                             String name = nameField.getText();
                             if (name.trim().isEmpty()) return null;
 
-                            // Commit values in case user typed but didn't press enter
+
                             commitEditorText(priceSpinner);
                             commitEditorText(stockSpinner);
 
@@ -288,7 +285,7 @@ public class DashboardController {
                     try {
                         productService.createProduct(product);
                         loadData();
-                    } catch (SQLException e) {
+                    } catch (ValidationException | DaoException e) {
                         showError("Add Error", e.getMessage());
                     }
                 });
@@ -328,7 +325,7 @@ public class DashboardController {
         alert.showAndWait();
     }
 
-    // Helper class for Cart TableView
+
     public static class CartEntry {
         private final Product product;
         private final int quantity;

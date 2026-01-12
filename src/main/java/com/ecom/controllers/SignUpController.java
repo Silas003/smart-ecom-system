@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import java.io.IOException;
 import com.ecom.models.User;
 import java.util.regex.Pattern;
+import com.ecom.exceptions.*;
 
 
 public class SignUpController {
@@ -91,7 +92,8 @@ public class SignUpController {
         user.setPassword(password); // Will be hashed in UserService
         
         // Attempt to sign up
-        if (UserService.signUp(user)) {
+        try {
+            UserService.signUp(user);
             showAlert(Alert.AlertType.INFORMATION, "Success",
                     "User creation successful!");
             try {
@@ -99,9 +101,13 @@ public class SignUpController {
             } catch (IOException e) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
             }
-        } else {
-            showAlert(Alert.AlertType.ERROR, "Error", 
-                    "Signup failed. Email may already be registered.");
+        } catch (DuplicateEntityException dee) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Signup failed. Email may already be registered.");
+        } catch (ValidationException ve) {
+            String field = ve.getFieldName() == null ? "" : (" ("+ve.getFieldName()+")");
+            showAlert(Alert.AlertType.ERROR, "Validation error", ve.getMessage() + field);
+        } catch (DaoException de) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Signup failed due to a server error.");
         }
     }
 

@@ -1,7 +1,11 @@
 package com.ecom.controllers;
 
-import com.ecom.dao.UsersDao;
+import com.ecom.services.UserService;
 import com.ecom.models.User;
+import com.ecom.exceptions.DaoException;
+import com.ecom.exceptions.InvalidInputException;
+import com.ecom.exceptions.ValidationException;
+import com.ecom.utils.ValidationUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -39,8 +43,12 @@ public class UserManagementController {
     private void loadUsersAsync() {
         Task<List<User>> task = new Task<>() {
             @Override
-            protected List<User> call() {
-                return UsersDao.findAll();
+            protected List<User> call() throws Exception {
+                try {
+                    return UserService.findAll();
+                } catch (DaoException e) {
+                    throw e;
+                }
             }
 
             @Override
@@ -50,7 +58,8 @@ public class UserManagementController {
 
             @Override
             protected void failed() {
-                showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+                Throwable ex = getException();
+                showAlert(Alert.AlertType.ERROR, "Error", ex.getMessage());
             }
         };
         new Thread(task, "load-users").start();
@@ -62,9 +71,13 @@ public class UserManagementController {
         if (q.isEmpty()) { loadUsersAsync(); return; }
         Task<List<User>> task = new Task<>() {
             @Override
-            protected List<User> call() {
-                List<User> all = UsersDao.findAll();
-                return all.stream().filter(u -> u.getUsername().toLowerCase().contains(q) || u.getEmail().toLowerCase().contains(q)).toList();
+            protected List<User> call() throws Exception {
+                try {
+                    List<User> all = UserService.findAll();
+                    return all.stream().filter(u -> u.getUsername().toLowerCase().contains(q) || u.getEmail().toLowerCase().contains(q)).toList();
+                } catch (DaoException e) {
+                    throw e;
+                }
             }
 
             @Override
@@ -91,14 +104,19 @@ public class UserManagementController {
     private void handleDeleteUser() {
         User sel = usersTable.getSelectionModel().getSelectedItem();
         if (sel == null) { showAlert(Alert.AlertType.WARNING, "No selection", "Select a user to delete."); return; }
+        if (sel.getUserId() <= 0) { showAlert(Alert.AlertType.ERROR, "Invalid user", "Selected user has invalid id."); return; }
         Alert a = new Alert(Alert.AlertType.CONFIRMATION, "Delete user?", ButtonType.YES, ButtonType.NO);
         a.showAndWait().ifPresent(b -> {
             if (b == ButtonType.YES) {
                 Task<Void> task = new Task<>() {
                     @Override
-                    protected Void call() {
-                        UsersDao.deleteUser(sel.getUserId());
-                        return null;
+                    protected Void call() throws Exception {
+                        try {
+                            UserService.deleteUser(sel.getUserId());
+                            return null;
+                        } catch (DaoException | InvalidInputException e) {
+                            throw e;
+                        }
                     }
                     @Override
                     protected void succeeded() { userList.remove(sel); }
@@ -138,15 +156,22 @@ public class UserManagementController {
                 String em = email.getText().trim();
                 String ph = phone.getText().trim();
                 String rl = role.getText().trim();
-                if (un.isEmpty() || em.isEmpty()) { showAlert(Alert.AlertType.ERROR, "Validation", "Username and email are required"); return null; }
+                try {
+
+                    ValidationUtils.requireNonEmpty(un, "username");
+                    ValidationUtils.requireEmail(em, "email");
+                } catch (ValidationException ive) {
+                    showAlert(Alert.AlertType.ERROR, "Validation", ive.getMessage());
+                    return null;
+                }
                 if (user == null) {
                     User u = new User(); u.setUsername(un); u.setEmail(em); u.setPhone(ph); u.setRole(rl); u.setPassword("changeme");
-                    Task<Void> task = new Task<>() { @Override protected Void call() { UsersDao.createUser(u); return null; } @Override protected void succeeded() { loadUsersAsync(); } @Override protected void failed() { showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage()); } };
+                    Task<Void> task = new Task<>() { @Override protected Void call() throws Exception { try { UserService.createUser(u); return null; } catch (ValidationException | DaoException e) { throw e; } } @Override protected void succeeded() { loadUsersAsync(); } @Override protected void failed() { showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage()); } };
                     new Thread(task, "create-user").start();
                     return u;
                 } else {
                     user.setUsername(un); user.setEmail(em); user.setPhone(ph); user.setRole(rl);
-                    Task<Void> task = new Task<>() { @Override protected Void call() { UsersDao.updateUser(user.getUsername(), user.getUserId()); return null; } @Override protected void succeeded() { loadUsersAsync(); } @Override protected void failed() { showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage()); } };
+                    Task<Void> task = new Task<>() { @Override protected Void call() throws Exception { try { UserService.updateUser(user); return null; } catch (ValidationException | DaoException e) { throw e; } } @Override protected void succeeded() { loadUsersAsync(); } @Override protected void failed() { showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage()); } };
                     new Thread(task, "update-user").start();
                     return user;
                 }
