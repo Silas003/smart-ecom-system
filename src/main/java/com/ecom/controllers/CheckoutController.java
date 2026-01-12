@@ -144,6 +144,19 @@ public class CheckoutController {
         }
     }
 
+    @FXML
+    private void handleBack() {
+        try {
+            if (com.ecom.utils.NavigationUtils.canGoBack()) {
+                com.ecom.utils.NavigationUtils.goBack();
+            } else {
+                handleBackToCart();
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", e.getMessage());
+        }
+    }
+
     private void updateOrderSummary() {
         if (subtotalLabel == null || taxLabel == null || orderTotalLabel == null) {
             return; // FXML not fully loaded yet

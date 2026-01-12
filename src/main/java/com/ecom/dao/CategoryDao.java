@@ -20,8 +20,6 @@ public class CategoryDao {
           category.setCategoryId(generatedKeys.getInt(1));
         }
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
@@ -36,8 +34,6 @@ public class CategoryDao {
           return mapResultSetToCategory(rs);
         }
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
       return null;
   }
@@ -52,8 +48,6 @@ public class CategoryDao {
       while (rs.next()) {
         categories.add(mapResultSetToCategory(rs));
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
       return categories;
   }
@@ -66,8 +60,6 @@ public class CategoryDao {
       stmt.setString(1, category.getName());
       stmt.setInt(2, category.getCategoryId());
       stmt.executeUpdate();
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
@@ -78,8 +70,6 @@ public class CategoryDao {
 
       stmt.setInt(1, id);
       stmt.executeUpdate();
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 

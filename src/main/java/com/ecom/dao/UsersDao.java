@@ -27,8 +27,6 @@ public class UsersDao {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
 
     }
@@ -41,12 +39,10 @@ public class UsersDao {
             preparedStatement.setInt(1,id);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()){
-                user = returnUser(rs);
+                user = mapResultSetToUser(rs);
             }
             return user;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
@@ -60,12 +56,10 @@ public class UsersDao {
             preparedStatement.setString(1,email);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()){
-                user = returnUser(rs);
+                user = mapResultSetToUser(rs);
             }
             return user;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
@@ -83,8 +77,6 @@ public class UsersDao {
             return false;
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -95,13 +87,11 @@ public class UsersDao {
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()){
-                users.add(returnUser(rs));
+                users.add(mapResultSetToUser(rs));
             }
             return users;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
@@ -121,8 +111,6 @@ public class UsersDao {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
 
     }
@@ -138,13 +126,11 @@ public class UsersDao {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
 
     }
 
-    private static User returnUser(ResultSet rs) {
+    private static User mapResultSetToUser(ResultSet rs) {
         User user = new User();
         try {
             user.setEmail(rs.getString("email"));

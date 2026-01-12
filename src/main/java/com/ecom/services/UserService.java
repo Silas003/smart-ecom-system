@@ -42,7 +42,8 @@ public class UserService {
             }
             return null;
         } catch (Exception e) {
-            System.err.println("Error during login: " + e.getMessage());
+//            System.err.println("Error during login: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

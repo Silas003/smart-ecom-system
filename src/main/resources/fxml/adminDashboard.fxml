@@ -9,6 +9,7 @@
 
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 20; -fx-background-color: #343a40;">
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
             <Label text="Admin Dashboard" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Manage Products" onAction="#handleManageProducts"
@@ -45,6 +46,18 @@
                         <Label fx:id="totalCustomersLabel" text="0"
                                style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ffc107;"/>
                     </VBox>
+
+                    <VBox spacing="10" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+                        <Label text="Cache Stats" style="-fx-text-fill: #666;"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Hits:"/>
+                            <Label fx:id="cacheHitsLabel" text="0"/>
+                            <Label text="Misses:"/>
+                            <Label fx:id="cacheMissesLabel" text="0"/>
+                            <Button text="Clear Cache" onAction="#handleClearCache" style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
+                        </HBox>
+                    </VBox>
                 </HBox>
 
                 <!-- Sales Chart -->
@@ -69,7 +82,6 @@
                             <TableColumn text="Customer" prefWidth="200"/>
                             <TableColumn text="Date" prefWidth="150"/>
                             <TableColumn text="Total" prefWidth="100"/>
-                            <TableColumn text="Status" prefWidth="150"/>
                         </columns>
                     </TableView>
                 </VBox>

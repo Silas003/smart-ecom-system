@@ -8,6 +8,7 @@
 
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 20; -fx-background-color: white;">
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;"/>
             <Label text="Checkout" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
         </HBox>
     </top>

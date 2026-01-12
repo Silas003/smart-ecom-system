@@ -75,6 +75,19 @@ public class LoginController {
        }
     }
 
+    @FXML
+    private void handleBack(ActionEvent event) {
+        try {
+            if (com.ecom.utils.NavigationUtils.canGoBack()) {
+                com.ecom.utils.NavigationUtils.goBack();
+            } else {
+                // No previous screen: do nothing or navigate to default
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

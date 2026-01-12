@@ -37,6 +37,19 @@ public class SignUpController {
         }
     }
     
+    @FXML
+    private void handleBack(ActionEvent event) {
+        try {
+            if (com.ecom.utils.NavigationUtils.canGoBack()) {
+                com.ecom.utils.NavigationUtils.goBack();
+            } else {
+                // nothing
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private boolean isValidEmail(String email) {
         return pattern.matcher(email).matches();
     }

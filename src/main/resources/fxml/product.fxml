@@ -10,6 +10,7 @@
     <top>
         <VBox style="-fx-background-color: #007bff;">
             <HBox alignment="CENTER_LEFT" spacing="18" style="-fx-padding: 10; -fx-background-color: #007bff;">
+                <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
                 <Label text="Smart e-com" style="-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="My Account" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
@@ -54,6 +55,13 @@
                                 style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 5;"/>
                     </VBox>
                 </GridPane>
+
+                <!-- Pagination and progress indicator for product listing -->
+                <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 15 0 0 0;">
+                    <Pagination fx:id="pagination" pageCount="1" />
+                    <ProgressIndicator fx:id="progress" visible="false" prefWidth="24" prefHeight="24" />
+                </HBox>
+
             </VBox>
         </ScrollPane>
     </center>

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.ecom.models.Product;
 import com.ecom.utils.DatabaseUtils;
+
 public class ProductDao {
 
   public void create(Product product) throws SQLException {
@@ -28,8 +29,6 @@ public class ProductDao {
           product.setProductId(generatedKeys.getInt(1));
         }
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
@@ -44,8 +43,6 @@ public class ProductDao {
           return mapResultSetToProduct(rs);
         }
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
       return null;
   }
@@ -60,8 +57,6 @@ public class ProductDao {
       while (rs.next()) {
         products.add(mapResultSetToProduct(rs));
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
       return products;
   }
@@ -78,8 +73,6 @@ public class ProductDao {
           products.add(mapResultSetToProduct(rs));
         }
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
       return products;
   }
@@ -102,8 +95,6 @@ public class ProductDao {
       stmt.setInt(5, product.getProductId());
 
       stmt.executeUpdate();
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
@@ -114,8 +105,6 @@ public class ProductDao {
 
       stmt.setInt(1, id);
       stmt.executeUpdate();
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
@@ -126,5 +115,44 @@ public class ProductDao {
         rs.getString("name"),
         rs.getDouble("price"),
         rs.getInt("stock_quantity"));
+  }
+
+  // Search with pagination and sorting - placeholders and parameter indexes must match
+  public List<Product> search(String q, int offset, int limit, String sortBy, boolean asc) throws SQLException {
+    List<Product> products = new ArrayList<>();
+    String base = "SELECT * FROM products WHERE LOWER(name) LIKE ? ";
+    String order = "";
+    if (sortBy != null && !sortBy.isBlank()) {
+      // whitelist allowed sort columns
+      if ("name".equals(sortBy) || "price".equals(sortBy) || "stock_quantity".equals(sortBy)) {
+        order = " ORDER BY " + sortBy + (asc ? " ASC" : " DESC");
+      }
+    }
+    String sql = base + order + " LIMIT ? OFFSET ?";
+    try (Connection conn = DatabaseUtils.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+      String like = "%" + (q == null ? "" : q.toLowerCase()) + "%";
+      stmt.setString(1, like);
+      stmt.setInt(2, limit);
+      stmt.setInt(3, offset);
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          products.add(mapResultSetToProduct(rs));
+        }
+      }
+    }
+    return products;
+  }
+
+  public int count(String q) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM products WHERE LOWER(name) LIKE ?";
+    try (Connection conn = DatabaseUtils.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+      String like = "%" + (q == null ? "" : q.toLowerCase()) + "%";
+      stmt.setString(1, like);
+      try (ResultSet rs = stmt.executeQuery()) {
+        return rs.next() ? rs.getInt(1) : 0;
+      }
+    }
   }
 }

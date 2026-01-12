@@ -13,6 +13,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.concurrent.Task;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -27,6 +29,8 @@ public class ProductController {
     @FXML private ComboBox<String> sortComboBox;
     @FXML private GridPane productGrid;
     @FXML private Label cartCountLabel;
+    @FXML private Pagination pagination;
+    @FXML private ProgressIndicator progress;
 
     private ProductService productService;
     private CategoryDao categoryDao;
@@ -34,18 +38,31 @@ public class ProductController {
     private List<Product> allProducts;
     private Map<Integer, String> categoryMap = new HashMap<>();
 
+    private final int pageSize = 9;
+
     @FXML
     public void initialize() {
-        productService = new ProductService();
+        productService = ProductService.getInstance();
         categoryDao = new CategoryDao();
         cartService = CartService.getInstance();
-        
+
         loadCategories();
         initializeSortOptions();
-        loadProducts();
+        initializePagination();
         updateCartCount();
     }
-    
+
+    private void initializePagination() {
+        if (pagination != null) {
+            pagination.setPageFactory(this::createPage);
+        }
+    }
+
+    private VBox createPage(int pageIndex) {
+        loadProductsAsync(pageIndex);
+        return new VBox();
+    }
+
     private void loadCategories() {
         try {
             List<Category> categories = categoryDao.findAll();
@@ -60,7 +77,7 @@ public class ProductController {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to load categories: " + e.getMessage());
         }
     }
-    
+
     private void initializeSortOptions() {
         ObservableList<String> sortOptions = FXCollections.observableArrayList(
                 "Featured", "Price: Low to High", "Price: High to Low", "Name: A-Z"
@@ -71,27 +88,20 @@ public class ProductController {
 
     @FXML
     private void handleSearch() {
-        String query = searchField.getText().trim();
-        if (query.isEmpty()) {
-            displayProducts(allProducts);
-        } else {
-            try {
-                List<Product> searchResults = productService.searchProductsByName(query);
-                displayProducts(searchResults);
-            } catch (SQLException e) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Search failed: " + e.getMessage());
-            }
-        }
+        pagination.setCurrentPageIndex(0);
+        loadProductsAsync(0);
     }
 
     @FXML
     private void handleCategoryChange() {
-        filterAndDisplayProducts();
+        pagination.setCurrentPageIndex(0);
+        loadProductsAsync(0);
     }
 
     @FXML
     private void handleSortChange() {
-        filterAndDisplayProducts();
+        pagination.setCurrentPageIndex(0);
+        loadProductsAsync(0);
     }
 
     @FXML
@@ -100,97 +110,103 @@ public class ProductController {
             NavigationUtils.navigate("cart");
         } catch (IOException e) {
             e.printStackTrace();
-            // showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate to cart: " + e.getMessage());
         }
     }
-    
+
     @FXML
     private void handleAddToCart(Product product) {
         if (product.getStockQuantity() <= 0) {
             showAlert(Alert.AlertType.WARNING, "Out of Stock", "This product is currently out of stock.");
             return;
         }
-        
+
         int currentQty = cartService.getQuantity(product.getProductId());
         if (currentQty >= product.getStockQuantity()) {
             showAlert(Alert.AlertType.WARNING, "Stock Limit", "You cannot add more than available stock.");
             return;
         }
-        
+
         cartService.addToCart(product.getProductId(), 1);
         updateCartCount();
         showAlert(Alert.AlertType.INFORMATION, "Added to Cart", product.getName() + " added to cart!");
     }
 
-    private void loadProducts() {
-        try {
-            allProducts = productService.getAllProducts();
-            filterAndDisplayProducts();
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load products: " + e.getMessage());
+    private void loadProductsAsync(int pageIndex) {
+        String q = searchField.getText().trim();
+        String sortBy = null;
+        boolean asc = true;
+        switch (sortComboBox.getValue()) {
+            case "Price: Low to High": sortBy = "price"; asc = true; break;
+            case "Price: High to Low": sortBy = "price"; asc = false; break;
+            case "Name: A-Z": sortBy = "name"; asc = true; break;
+            default: sortBy = ""; break;
         }
+
+        // make copies so they are effectively final for the Task
+        final String sSortBy = sortBy;
+        final boolean sAsc = asc;
+
+        progress.setVisible(true);
+        productGrid.setDisable(true);
+
+        Task<Void> task = new Task<>() {
+            List<Product> results;
+            int total;
+
+            @Override
+            protected Void call() {
+                try {
+                    results = productService.search(q, pageIndex, pageSize, sSortBy, sAsc, true);
+                    total = productService.count(q);
+                } catch (SQLException ex) {
+                    results = List.of();
+                    total = 0;
+                    Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "DB Error", ex.getMessage()));
+                }
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                displayProducts(results);
+                int pageCount = Math.max(1, (int) Math.ceil((double) total / pageSize));
+                pagination.setPageCount(pageCount);
+                pagination.setCurrentPageIndex(pageIndex);
+                progress.setVisible(false);
+                productGrid.setDisable(false);
+            }
+
+            @Override
+            protected void failed() {
+                progress.setVisible(false);
+                productGrid.setDisable(false);
+                showAlert(Alert.AlertType.ERROR, "Failed", getException().getMessage());
+            }
+        };
+        Thread th = new Thread(task, "product-load");
+        th.setDaemon(true);
+        th.start();
     }
-    
+
     private void filterAndDisplayProducts() {
-        List<Product> filtered = allProducts;
-        
-        // Filter by category
-        String selectedCategory = categoryComboBox.getValue();
-        if (selectedCategory != null && !selectedCategory.equals("All Categories")) {
-            int categoryId = getCategoryIdByName(selectedCategory);
-            if (categoryId > 0) {
-                filtered = filtered.stream()
-                    .filter(p -> p.getCategoryId() == categoryId)
-                    .collect(java.util.stream.Collectors.toList());
-            }
-        }
-        
-        // Sort products
-        String sortOption = sortComboBox.getValue();
-        if (sortOption != null) {
-            switch (sortOption) {
-                case "Price: Low to High":
-                    filtered = productService.sortProductsByPrice(filtered, true);
-                    break;
-                case "Price: High to Low":
-                    filtered = productService.sortProductsByPrice(filtered, false);
-                    break;
-                case "Name: A-Z":
-                    filtered = filtered.stream()
-                        .sorted((p1, p2) -> p1.getName().compareToIgnoreCase(p2.getName()))
-                        .collect(java.util.stream.Collectors.toList());
-                    break;
-                default: // Featured - no sorting
-                    break;
-            }
-        }
-        
-        displayProducts(filtered);
+        // Not used with pagination; kept for compatibility
+        loadProductsAsync(0);
     }
-    
-    private int getCategoryIdByName(String categoryName) {
-        for (Map.Entry<Integer, String> entry : categoryMap.entrySet()) {
-            if (entry.getValue().equals(categoryName)) {
-                return entry.getKey();
-            }
-        }
-        return 0;
-    }
-    
+
     private void displayProducts(List<Product> products) {
         productGrid.getChildren().clear();
         productGrid.setHgap(20);
         productGrid.setVgap(20);
         productGrid.setPadding(new Insets(20));
-        
+
         int column = 0;
         int row = 0;
         int columnsPerRow = 3;
-        
+
         for (Product product : products) {
             VBox productCard = createProductCard(product);
             productGrid.add(productCard, column, row);
-            
+
             column++;
             if (column >= columnsPerRow) {
                 column = 0;
@@ -198,7 +214,7 @@ public class ProductController {
             }
         }
     }
-    
+
     private VBox createProductCard(Product product) {
         VBox card = new VBox(10);
         card.setPadding(new Insets(15));
@@ -206,28 +222,28 @@ public class ProductController {
                       "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
         card.setPrefWidth(250);
         card.setAlignment(Pos.TOP_CENTER);
-        
+
         // Product image placeholder
         Label imagePlaceholder = new Label("[Product Image]");
         imagePlaceholder.setPrefHeight(200);
         imagePlaceholder.setPrefWidth(250);
         imagePlaceholder.setStyle("-fx-background-color: #e0e0e0; -fx-alignment: center;");
-        
+
         // Product name
         Label nameLabel = new Label(product.getName());
         nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
         nameLabel.setWrapText(true);
-        
+
         // Product price
         Label priceLabel = new Label(String.format("$%.2f", product.getPrice()));
         priceLabel.setStyle("-fx-text-fill: #007bff; -fx-font-size: 18px; -fx-font-weight: bold;");
-        
+
         // Stock info
         Label stockLabel = new Label(product.getStockQuantity() > 0 ? 
             "In Stock" : "Out of Stock");
         stockLabel.setStyle(product.getStockQuantity() > 0 ? 
             "-fx-text-fill: #28a745;" : "-fx-text-fill: #dc3545;");
-        
+
         // Add to cart button
         Button addToCartBtn = new Button("Add to Cart");
         addToCartBtn.setPrefWidth(250);
@@ -235,11 +251,11 @@ public class ProductController {
                              "-fx-cursor: hand; -fx-background-radius: 5;");
         addToCartBtn.setDisable(product.getStockQuantity() <= 0);
         addToCartBtn.setOnAction(e -> handleAddToCart(product));
-        
+
         card.getChildren().addAll(imagePlaceholder, nameLabel, priceLabel, stockLabel, addToCartBtn);
         return card;
     }
-    
+
     private void updateCartCount() {
         int totalItems = cartService.getTotalItems();
         cartCountLabel.setText(String.valueOf(totalItems));
@@ -251,5 +267,18 @@ public class ProductController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleBack() {
+        try {
+            if (com.ecom.utils.NavigationUtils.canGoBack()) {
+                com.ecom.utils.NavigationUtils.goBack();
+            } else {
+                showAlert(Alert.AlertType.INFORMATION, "Back", "No previous screen to go back to.");
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", e.getMessage());
+        }
     }
 }

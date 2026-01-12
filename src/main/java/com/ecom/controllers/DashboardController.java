@@ -346,4 +346,14 @@ public class DashboardController {
             return quantity;
         }
     }
+    @FXML
+    private void handleBack() {
+        try {
+            if (com.ecom.utils.NavigationUtils.canGoBack()) {
+                com.ecom.utils.NavigationUtils.goBack();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

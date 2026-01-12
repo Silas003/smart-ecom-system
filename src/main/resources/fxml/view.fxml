@@ -26,6 +26,7 @@
                 <HBox spacing="10.0">
                     <children>
                         <TextField fx:id="searchField" promptText="Search by Name..." HBox.hgrow="ALWAYS" />
+                        <Button text="Back" onAction="#handleBack" />
                         <Button mnemonicParsing="false" onAction="#handleSearch" text="Search" />
                         <Button mnemonicParsing="false" onAction="#handleSortAsc" text="Sort Price Asc" />
                         <Button mnemonicParsing="false" onAction="#handleSortDesc" text="Sort Price Desc" />

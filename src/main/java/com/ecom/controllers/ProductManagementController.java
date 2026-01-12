@@ -11,6 +11,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.concurrent.Task;
+import javafx.application.Platform;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ public class ProductManagementController {
     @FXML private TableColumn<Product, Double> priceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
     @FXML private TextField searchField;
+    @FXML private ProgressIndicator progress;
 
     private ObservableList<Product> productList = FXCollections.observableArrayList();
     private ProductService productService;
@@ -33,15 +36,15 @@ public class ProductManagementController {
 
     @FXML
     public void initialize() {
-        productService = new ProductService();
+        productService = ProductService.getInstance();
         loadCategories();
-        
+
         // Setup table columns with correct property names
         idColumn.setCellValueFactory(new PropertyValueFactory<>("productId"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         stockColumn.setCellValueFactory(new PropertyValueFactory<>("stockQuantity"));
-        
+
         // Custom cell factory for category column to show category name
         categoryColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
@@ -50,9 +53,9 @@ public class ProductManagementController {
         });
 
         productsTable.setItems(productList);
-        loadProducts();
+        loadProductsAsync();
     }
-    
+
     private void loadCategories() {
         try {
             CategoryDao categoryDao = new CategoryDao();
@@ -90,13 +93,30 @@ public class ProductManagementController {
             alert.setContentText("Are you sure you want to delete this product?");
             alert.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
-                    try {
-                        productService.deleteProduct(selected.getProductId());
-                        productList.remove(selected);
-                        showAlert(Alert.AlertType.INFORMATION, "Success", "Product deleted successfully.");
-                    } catch (SQLException e) {
-                        showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete product: " + e.getMessage());
-                    }
+                    Task<Void> task = new Task<>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            productService.deleteProduct(selected.getProductId());
+                            return null;
+                        }
+
+                        @Override
+                        protected void succeeded() {
+                            productList.remove(selected);
+                            showAlert(Alert.AlertType.INFORMATION, "Success", "Product deleted successfully.");
+                            progress.setVisible(false);
+                        }
+
+                        @Override
+                        protected void failed() {
+                            progress.setVisible(false);
+                            showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+                        }
+                    };
+                    progress.setVisible(true);
+                    Thread t = new Thread(task, "delete-product");
+                    t.setDaemon(true);
+                    t.start();
                 }
             });
         } else {
@@ -108,27 +128,54 @@ public class ProductManagementController {
     private void handleSearch() {
         String query = searchField.getText().trim();
         if (query.isEmpty()) {
-            loadProducts();
+            loadProductsAsync();
             return;
         }
-        
-        try {
-            List<Product> searchResults = productService.searchProductsByName(query);
-            productList.clear();
-            productList.addAll(searchResults);
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Search failed: " + e.getMessage());
-        }
+
+        Task<List<Product>> task = new Task<>() {
+            @Override
+            protected List<Product> call() throws Exception {
+                return productService.searchProductsByName(query);
+            }
+
+            @Override
+            protected void succeeded() {
+                productList.setAll(getValue());
+            }
+
+            @Override
+            protected void failed() {
+                showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+            }
+        };
+        Thread t = new Thread(task, "search-products");
+        t.setDaemon(true);
+        t.start();
     }
 
-    private void loadProducts() {
-        try {
-            List<Product> products = productService.getAllProducts();
-            productList.clear();
-            productList.addAll(products);
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load products: " + e.getMessage());
-        }
+    private void loadProductsAsync() {
+        Task<List<Product>> task = new Task<>() {
+            @Override
+            protected List<Product> call() throws Exception {
+                return productService.getAllProducts();
+            }
+
+            @Override
+            protected void succeeded() {
+                productList.setAll(getValue());
+                progress.setVisible(false);
+            }
+
+            @Override
+            protected void failed() {
+                progress.setVisible(false);
+                showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+            }
+        };
+        progress.setVisible(true);
+        Thread t = new Thread(task, "load-products");
+        t.setDaemon(true);
+        t.start();
     }
 
     private void showProductDialog(Product product) {
@@ -151,7 +198,7 @@ public class ProductManagementController {
         TextField stockField = new TextField();
         stockField.setPromptText("Stock Quantity");
         ComboBox<String> categoryCombo = new ComboBox<>();
-        
+
         // Populate category combo
         ObservableList<String> categoryNames = FXCollections.observableArrayList(categoryMap.values());
         categoryCombo.setItems(categoryNames);
@@ -214,7 +261,7 @@ public class ProductManagementController {
                     double price = Double.parseDouble(priceField.getText().trim());
                     int stock = Integer.parseInt(stockField.getText().trim());
                     String categoryName = categoryCombo.getValue();
-                    
+
                     // Find category ID from name
                     int categoryId = 0;
                     for (Map.Entry<Integer, String> entry : categoryMap.entrySet()) {
@@ -223,21 +270,60 @@ public class ProductManagementController {
                             break;
                         }
                     }
-                    
+
                     Product newProduct;
                     if (product == null) {
                         newProduct = new Product(categoryId, name, price, stock);
-                        productService.createProduct(newProduct);
+                        Task<Void> task = new Task<>() {
+                            @Override
+                            protected Void call() throws Exception {
+                                productService.createProduct(newProduct);
+                                return null;
+                            }
+
+                            @Override
+                            protected void succeeded() {
+                                loadProductsAsync();
+                                showAlert(Alert.AlertType.INFORMATION, "Success", "Product created.");
+                            }
+
+                            @Override
+                            protected void failed() {
+                                showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+                            }
+                        };
+                        progress.setVisible(true);
+                        Thread t = new Thread(task, "create-product");
+                        t.setDaemon(true);
+                        t.start();
                     } else {
                         newProduct = new Product(product.getProductId(), categoryId, name, price, stock);
-                        productService.updateProduct(newProduct);
+                        Task<Void> task = new Task<>() {
+                            @Override
+                            protected Void call() throws Exception {
+                                productService.updateProduct(newProduct);
+                                return null;
+                            }
+
+                            @Override
+                            protected void succeeded() {
+                                loadProductsAsync();
+                                showAlert(Alert.AlertType.INFORMATION, "Success", "Product updated.");
+                            }
+
+                            @Override
+                            protected void failed() {
+                                showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+                            }
+                        };
+                        progress.setVisible(true);
+                        Thread t = new Thread(task, "update-product");
+                        t.setDaemon(true);
+                        t.start();
                     }
                     return newProduct;
                 } catch (NumberFormatException e) {
                     showAlert(Alert.AlertType.ERROR, "Invalid Input", "Please enter valid numbers for price and stock.");
-                    return null;
-                } catch (SQLException e) {
-                    showAlert(Alert.AlertType.ERROR, "Error", "Failed to save product: " + e.getMessage());
                     return null;
                 }
             }
@@ -245,9 +331,7 @@ public class ProductManagementController {
         });
 
         dialog.showAndWait().ifPresent(result -> {
-            if (result != null) {
-                loadProducts();
-            }
+            // nothing further - background tasks will refresh
         });
     }
 
@@ -257,5 +341,18 @@ public class ProductManagementController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleBack() {
+        try {
+            if (com.ecom.utils.NavigationUtils.canGoBack()) {
+                com.ecom.utils.NavigationUtils.goBack();
+            } else {
+                showAlert(Alert.AlertType.INFORMATION, "Back", "No previous screen to go back to.");
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", e.getMessage());
+        }
     }
 }

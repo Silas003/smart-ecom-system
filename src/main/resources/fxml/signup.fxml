@@ -18,12 +18,14 @@
                      -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
 
             <!-- Title -->
-            <Label text="Smart e-com"
-                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #333;">
-                <font>
-                    <Font name="System Bold" size="28.0"/>
-                </font>
-            </Label>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Smart e-com"
+                       style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #333;">
+                    <font>
+                        <Font name="System Bold" size="28.0"/>
+                    </font>
+                </Label>
+            </HBox>
 
             <Label text="Signup account"
                    style="-fx-text-fill: #666; -fx-font-size: 14px;"/>
@@ -90,7 +92,7 @@
                 <Label text="Already have an account?"
                        style="-fx-text-fill: #666;"/>
                 <Hyperlink fx:id="loginlink"
-                           text="Login in"
+                           text="Login"
                            onAction="#handleLogin"
                            style="-fx-text-fill: #007bff;"/>
             </HBox>

@@ -33,7 +33,7 @@ public class OrderDao {
 
       // 2. Insert Order
       String insertOrderSQL =
-          "INSERT INTO orders (user_id, order_date, total_amount) VALUES (?, NOW(), ?)";
+          "INSERT INTO orders (user_id, total_amount) VALUES (?, NOW(), ?)";
       orderStmt = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS);
       orderStmt.setInt(1, userId);
       orderStmt.setDouble(2, totalAmount);
@@ -102,8 +102,6 @@ public class OrderDao {
         }
       }
       throw e; // Re-throw to notify caller
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     } finally {
       // 5. Reset AutoCommit and Close Resources
       if (conn != null) conn.setAutoCommit(true);
@@ -116,7 +114,7 @@ public class OrderDao {
 
   public List<Order> findByUserId(int userId) throws SQLException {
     List<Order> orders = new ArrayList<>();
-    String sql = "SELECT order_id, user_id, order_date, total_amount FROM orders WHERE user_id = ? ORDER BY order_date DESC";
+    String sql = "SELECT order_id, user_id, created_at, total_amount FROM orders WHERE user_id = ? ORDER BY created_at DESC";
     try (Connection conn = DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setInt(1, userId);
@@ -125,14 +123,12 @@ public class OrderDao {
           orders.add(mapResultSetToOrder(rs));
         }
       }
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
     }
-    return orders;
+      return orders;
   }
 
   public Order findById(int orderId) throws SQLException {
-    String sql = "SELECT order_id, user_id, order_date, total_amount FROM orders WHERE order_id = ?";
+    String sql = "SELECT order_id, user_id, created_at, total_amount FROM orders WHERE order_id = ?";
     try (Connection conn = DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setInt(1, orderId);
@@ -141,25 +137,21 @@ public class OrderDao {
           return mapResultSetToOrder(rs);
         }
       }
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
     }
-    return null;
+      return null;
   }
 
   public List<Order> findAll() throws SQLException {
     List<Order> orders = new ArrayList<>();
-    String sql = "SELECT order_id, user_id, order_date, total_amount FROM orders ORDER BY order_date DESC";
+    String sql = "SELECT order_id, user_id, created_at, total_amount FROM orders ORDER BY created_at DESC";
     try (Connection conn = DatabaseUtils.getConnection();
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sql)) {
       while (rs.next()) {
         orders.add(mapResultSetToOrder(rs));
       }
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
     }
-    return orders;
+      return orders;
   }
 
   public List<OrderItem> findOrderItemsByOrderId(int orderId) throws SQLException {
@@ -173,17 +165,15 @@ public class OrderDao {
           items.add(mapResultSetToOrderItem(rs));
         }
       }
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
     }
-    return items;
+      return items;
   }
 
   private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
     Order order = new Order();
     order.setOrderId(rs.getInt("order_id"));
     order.setUserId(rs.getInt("user_id"));
-    order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
+    order.setOrderDate(rs.getTimestamp("created_at").toLocalDateTime());
     order.setTotalAmount(rs.getDouble("total_amount"));
     return order;
   }

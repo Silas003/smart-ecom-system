@@ -23,8 +23,6 @@ public class ReviewsDao {
             if (rd > 0) {
                 System.out.println("Review created successfully.");
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -37,8 +35,6 @@ public class ReviewsDao {
             while (rs.next()) {
                 reviews.add(mapResultSetToReview(rs));
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
         return reviews;
     }
@@ -53,8 +49,6 @@ public class ReviewsDao {
             while (rs.next()) {
                 reviews.add(mapResultSetToReview(rs));
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
         return reviews;
     }
@@ -69,8 +63,6 @@ public class ReviewsDao {
             while (rs.next()) {
                 reviews.add(mapResultSetToReview(rs));
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
         return reviews;
     }
@@ -84,8 +76,6 @@ public class ReviewsDao {
             if (rs.next()) {
                 return mapResultSetToReview(rs);
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
         return null;
     }
@@ -101,8 +91,6 @@ public class ReviewsDao {
             if (rd > 0) {
                 System.out.println("Review updated successfully.");
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -115,8 +103,6 @@ public class ReviewsDao {
             if (rd > 0) {
                 System.out.println("Review deleted successfully.");
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 

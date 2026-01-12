@@ -9,6 +9,7 @@
     <top>
         <VBox>
             <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 20; -fx-background-color: white;">
+                <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;"/>
                 <Label text="Product Management" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="+ Add Product" onAction="#handleAddProduct"
@@ -41,6 +42,8 @@
                         style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-cursor: hand;"/>
                 <Button text="Delete" onAction="#handleDeleteProduct" prefWidth="100"
                         style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-cursor: hand;"/>
+                <!-- Progress indicator for background operations -->
+                <ProgressIndicator fx:id="progress" visible="false" prefWidth="20" prefHeight="20" />
             </HBox>
         </VBox>
     </center>

@@ -135,4 +135,17 @@ public class OrderManagementController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    @FXML
+    private void handleBack() {
+        try {
+            if (com.ecom.utils.NavigationUtils.canGoBack()) {
+                com.ecom.utils.NavigationUtils.goBack();
+            } else {
+                showAlert(Alert.AlertType.INFORMATION, "Back", "No previous screen to go back to.");
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", e.getMessage());
+        }
+    }
 }
