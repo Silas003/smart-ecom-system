@@ -102,33 +102,38 @@ public class UsersDao {
 
     }
 
-    public static void updateUser(User user) throws DaoException{
-        if (user == null) throw new DaoException("User is null");
-        if (user.getUserId() <= 0) throw new DaoException("Invalid user id: " + user.getUserId());
-        StringBuilder sql = new StringBuilder("update users set username=?, phone=?, email=?, userrole=?");
+    public static void updateUser(User user) throws DaoException {
+        if (user == null) throw new DaoException("User object cannot be null.");
+        if (user.getUserId() <= 0) throw new DaoException("Invalid user ID: " + user.getUserId());
+
+        String sql = "UPDATE users SET username = ?, phone = ?, email = ?, userrole = ?";
         boolean updatePassword = user.getPassword() != null && !user.getPassword().isEmpty();
-        if (updatePassword) sql.append(", password=?");
-        sql.append(" where id=?");
-
-        try(Connection conn = DatabaseUtils.getConnection()){
-            PreparedStatement preparedStatement = conn.prepareStatement(sql.toString());
-            preparedStatement.setString(1, user.getUsername());
-            preparedStatement.setString(2, user.getPhone());
-            preparedStatement.setString(3, user.getEmail());
-            preparedStatement.setString(4, user.getRole());
-            int idx = 5;
-            if (updatePassword) {
-                preparedStatement.setString(idx++, user.getPassword());
-            }
-            preparedStatement.setInt(idx, user.getUserId());
-            int rd = preparedStatement.executeUpdate();
-            if(rd > 0)
-                System.out.println("User updated successfully.");
-
-        } catch (SQLException e) {
-            throw new DaoException("Failed to update user", e);
+        if (updatePassword) {
+            sql += ", password = ?";
         }
+        sql += " WHERE id = ?";
 
+        try (Connection conn = DatabaseUtils.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getPhone());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getRole());
+
+            int paramIndex = 5;
+            if (updatePassword) {
+                stmt.setString(paramIndex++, user.getPassword());
+            }
+            stmt.setInt(paramIndex, user.getUserId());
+
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new DaoException("No user found with ID: " + user.getUserId());
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Failed to update user: " + e.getMessage(), e);
+        }
     }
 
     public static void deleteUser(int id) throws DaoException{

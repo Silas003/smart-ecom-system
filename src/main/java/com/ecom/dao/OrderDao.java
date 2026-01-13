@@ -36,7 +36,7 @@ public class OrderDao {
 
 
       String insertOrderSQL =
-          "INSERT INTO orders (user_id, total_amount) VALUES (?, NOW(), ?)";
+          "INSERT INTO orders (user_id, total_amount) VALUES (?, ?)";
       orderStmt = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS);
       orderStmt.setInt(1, userId);
       orderStmt.setDouble(2, totalAmount);
@@ -56,7 +56,7 @@ public class OrderDao {
 
       // 3. Insert Items & Update Stock
       String insertItemSQL =
-          "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES (?,"
+          "INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?,"
               + " ?, ?, ?)";
       // This query ensures we don't sell more than we have
       String updateStockSQL =
@@ -96,6 +96,7 @@ public class OrderDao {
       return true;
 
     } catch (InsufficientInventoryException e) {
+        e.getMessage();
       if (conn != null) {
         try {
           System.err.println("Transaction failed due to insufficient inventory. Rolling back.");
@@ -106,8 +107,11 @@ public class OrderDao {
       }
       throw e;
     } catch (SQLException e) {
+        e.getMessage();
       if (conn != null) {
         try {
+            e.getMessage();
+            e.printStackTrace();
           System.err.println("Transaction failed. Rolling back.");
           conn.rollback();
         } catch (SQLException ex) {
@@ -131,7 +135,7 @@ public class OrderDao {
 
   public List<Order> findByUserId(int userId) throws SQLException {
     List<Order> orders = new ArrayList<>();
-    String sql = "SELECT order_id, user_id, created_at, total_amount FROM orders WHERE user_id = ? ORDER BY created_at DESC";
+    String sql = "SELECT order_id, user_id, created_at,status, total_amount FROM orders WHERE user_id = ? ORDER BY created_at DESC";
     try (Connection conn = DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setInt(1, userId);
@@ -145,7 +149,7 @@ public class OrderDao {
   }
 
   public Order findById(int orderId) throws SQLException {
-    String sql = "SELECT order_id, user_id, created_at, total_amount FROM orders WHERE order_id = ?";
+    String sql = "SELECT order_id, user_id,status, created_at, total_amount FROM orders WHERE order_id = ?";
     try (Connection conn = DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setInt(1, orderId);
@@ -160,7 +164,7 @@ public class OrderDao {
 
   public List<Order> findAll() throws SQLException {
     List<Order> orders = new ArrayList<>();
-    String sql = "SELECT order_id, user_id, created_at, total_amount FROM orders ORDER BY created_at DESC";
+    String sql = "SELECT order_id, user_id,status, created_at, total_amount FROM orders ORDER BY created_at DESC";
     try (Connection conn = DatabaseUtils.getConnection();
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sql)) {
@@ -173,7 +177,7 @@ public class OrderDao {
 
   public List<OrderItem> findOrderItemsByOrderId(int orderId) throws SQLException {
     List<OrderItem> items = new ArrayList<>();
-    String sql = "SELECT id, order_id, product_id, quantity, price_at_purchase FROM order_items WHERE order_id = ?";
+    String sql = "SELECT id, order_id, product_id,quantity, price_at_purchase FROM order_items WHERE order_id = ?";
     try (Connection conn = DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setInt(1, orderId);
@@ -192,6 +196,7 @@ public class OrderDao {
     order.setUserId(rs.getInt("user_id"));
     order.setOrderDate(rs.getTimestamp("created_at").toLocalDateTime());
     order.setTotalAmount(rs.getDouble("total_amount"));
+    order.setStatus(rs.getString("status"));
     return order;
   }
 
@@ -199,7 +204,7 @@ public class OrderDao {
     OrderItem item = new OrderItem(
         rs.getInt("product_id"),
         rs.getInt("quantity"),
-        rs.getDouble("price_at_purchase")
+        rs.getDouble("unit_price")
     );
     item.setId(rs.getInt("id"));
     item.setOrderId(rs.getInt("order_id"));

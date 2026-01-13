@@ -149,5 +149,8 @@ public class ProductService {
     private void invalidateAll() {
         clearCache();
     }
-}
 
+    public List<Product> getProductsByCategory(int categoryId) throws SQLException {
+        return productDAO.findByCategoryId(categoryId);
+    }
+}

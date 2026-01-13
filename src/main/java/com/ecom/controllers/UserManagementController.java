@@ -18,18 +18,35 @@ import java.util.List;
 
 public class UserManagementController {
 
+    // Suppress warnings for unused fields and methods that are linked to FXML
+    @SuppressWarnings("unused")
     @FXML private TableView<User> usersTable;
+    @SuppressWarnings("unused")
     @FXML private TableColumn<User, Integer> idColumn;
+    @SuppressWarnings("unused")
     @FXML private TableColumn<User, String> usernameColumn;
+    @SuppressWarnings("unused")
     @FXML private TableColumn<User, String> emailColumn;
+    @SuppressWarnings("unused")
     @FXML private TableColumn<User, String> phoneColumn;
+    @SuppressWarnings("unused")
     @FXML private TableColumn<User, String> roleColumn;
+    @SuppressWarnings("unused")
     @FXML private TextField searchField;
 
-    private ObservableList<User> userList = FXCollections.observableArrayList();
+    private final ObservableList<User> userList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
+        // Ensure this method is used by FXML loader
+        assert usersTable != null : "Users table is not injected";
+        assert idColumn != null : "ID column is not injected";
+        assert usernameColumn != null : "Username column is not injected";
+        assert emailColumn != null : "Email column is not injected";
+        assert phoneColumn != null : "Phone column is not injected";
+        assert roleColumn != null : "Role column is not injected";
+        assert searchField != null : "Search field is not injected";
+
         idColumn.setCellValueFactory(cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getUserId()).asObject());
         usernameColumn.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getUsername()));
         emailColumn.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().getEmail()));
@@ -65,6 +82,7 @@ public class UserManagementController {
         new Thread(task, "load-users").start();
     }
 
+    @SuppressWarnings("unused")
     @FXML
     private void handleSearch() {
         String q = searchField.getText().trim().toLowerCase();
@@ -88,11 +106,13 @@ public class UserManagementController {
         new Thread(task, "search-users").start();
     }
 
+    @SuppressWarnings("unused")
     @FXML
     private void handleAddUser() {
         showUserDialog(null);
     }
 
+    @SuppressWarnings("unused")
     @FXML
     private void handleEditUser() {
         User sel = usersTable.getSelectionModel().getSelectedItem();
@@ -100,6 +120,7 @@ public class UserManagementController {
         showUserDialog(sel);
     }
 
+    @SuppressWarnings("unused")
     @FXML
     private void handleDeleteUser() {
         User sel = usersTable.getSelectionModel().getSelectedItem();
@@ -158,10 +179,12 @@ public class UserManagementController {
                 String rl = role.getText().trim();
                 try {
 
-                    ValidationUtils.requireNonEmpty(un, "username");
-                    ValidationUtils.requireEmail(em, "email");
-                } catch (ValidationException ive) {
-                    showAlert(Alert.AlertType.ERROR, "Validation", ive.getMessage());
+                    ValidationUtils.validateNotEmpty(un, "Username");
+                    ValidationUtils.validateEmail(em);
+                    ValidationUtils.validateNotEmpty(rl, "Role");
+                    ValidationUtils.validateRegex(ph, "^\\+?[0-9]{10,15}$", "Phone number");
+                } catch (ValidationException ve) {
+                    showAlert(Alert.AlertType.ERROR, "Validation Error", ve.getMessage());
                     return null;
                 }
                 if (user == null) {
@@ -191,6 +214,7 @@ public class UserManagementController {
         });
     }
 
+    @SuppressWarnings("unused")
     @FXML
     private void handleBack() {
         try {
@@ -201,6 +225,14 @@ public class UserManagementController {
             }
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Navigation Error", e.getMessage());
+        }
+    }
+
+    private void rethrowException(Exception e) throws DaoException {
+        if (e instanceof DaoException) {
+            throw (DaoException) e;
+        } else {
+            throw new DaoException("Unexpected error", e);
         }
     }
 }

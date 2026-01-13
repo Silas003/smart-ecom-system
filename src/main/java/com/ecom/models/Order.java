@@ -8,6 +8,7 @@ public class Order {
   private int userId;
   private LocalDateTime orderDate;
   private double totalAmount;
+  private String status;
 
   public Order() {}
 
@@ -48,4 +49,12 @@ public class Order {
   public void setTotalAmount(double totalAmount) {
     this.totalAmount = totalAmount;
   }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

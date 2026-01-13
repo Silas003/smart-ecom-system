@@ -67,10 +67,10 @@ public class ProductController {
         try {
             List<Category> categories = categoryDao.findAll();
             ObservableList<String> categoryNames = FXCollections.observableArrayList("All Categories");
-            for (Category category : categories) {
-                categoryMap.put(category.getCategoryId(), category.getName());
-                categoryNames.add(category.getName());
-            }
+            categories.stream().forEach(cat-> {
+                 categoryMap.put(cat.getCategoryId(), cat.getName());
+                categoryNames.add(cat.getName());
+            });
             categoryComboBox.setItems(categoryNames);
             categoryComboBox.setValue("All Categories");
         } catch (SQLException e) {
@@ -93,7 +93,8 @@ public class ProductController {
     }
 
     @FXML
-    private void handleCategoryChange() {
+    private void handleCategoryChange() throws SQLException {
+
         pagination.setCurrentPageIndex(0);
         loadProductsAsync(0);
     }
@@ -201,7 +202,7 @@ public class ProductController {
 
         int column = 0;
         int row = 0;
-        int columnsPerRow = 3;
+        int columnsPerRow = 4;
 
         for (Product product : products) {
             VBox productCard = createProductCard(product);
@@ -281,4 +282,20 @@ public class ProductController {
             showAlert(Alert.AlertType.ERROR, "Navigation Error", e.getMessage());
         }
     }
+
+    private Integer getSelectedCategoryId() {
+        String selected = categoryComboBox.getValue();
+
+        if (selected == null || selected.equals("All Categories")) {
+            return null;
+        }
+
+        for (Map.Entry<Integer, String> entry : categoryMap.entrySet()) {
+            if (entry.getValue().equals(selected)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
 }

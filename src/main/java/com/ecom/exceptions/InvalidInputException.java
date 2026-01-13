@@ -7,15 +7,4 @@ public class InvalidInputException extends ValidationException {
         super(message);
     }
 
-    public InvalidInputException(String message, String fieldName) {
-        super(message, fieldName);
-    }
-
-    public InvalidInputException(String message, String fieldName, Object invalidValue) {
-        super(message, fieldName, invalidValue);
-    }
-
-    public InvalidInputException(String message, String fieldName, Object invalidValue, Throwable cause) {
-        super(message, fieldName, invalidValue, cause);
-    }
 }

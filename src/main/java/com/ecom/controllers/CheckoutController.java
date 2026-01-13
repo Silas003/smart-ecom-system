@@ -62,36 +62,36 @@ public class CheckoutController {
 
     @FXML
     private void handlePlaceOrder() {
-        if (fullNameField.getText().trim().isEmpty() || 
-            emailField.getText().trim().isEmpty() ||
-            addressField.getText().trim().isEmpty() ||
-            cityField.getText().trim().isEmpty() ||
-            stateField.getText().trim().isEmpty() ||
-            zipField.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all required fields");
-            return;
-        }
+//        if (fullNameField.getText().trim().isEmpty() ||
+//            emailField.getText().trim().isEmpty() ||
+//            addressField.getText().trim().isEmpty() ||
+//            cityField.getText().trim().isEmpty() ||
+//            stateField.getText().trim().isEmpty() ||
+//            zipField.getText().trim().isEmpty()) {
+//            showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all required fields");
+//            return;
+//        }
 
 
-        if (paymentMethodCombo.getValue() == null) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please select a payment method");
-            return;
-        }
+//        if (paymentMethodCombo.getValue() == null) {
+//            showAlert(Alert.AlertType.ERROR, "Error", "Please select a payment method");
+//            return;
+//        }
 
         // Validate card details if credit/debit card
-        if (paymentMethodCombo.getValue().contains("Card")) {
-            if (cardNumberField.getText().trim().isEmpty() ||
-                expiryField.getText().trim().isEmpty() ||
-                cvvField.getText().trim().isEmpty()) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all payment details");
-                return;
-            }
-        }
+//        if (paymentMethodCombo.getValue().contains("Card")) {
+//            if (cardNumberField.getText().trim().isEmpty() ||
+//                expiryField.getText().trim().isEmpty() ||
+//                cvvField.getText().trim().isEmpty()) {
+//                showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all payment details");
+//                return;
+//            }
+//        }
 
-        if (cartService.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Empty Cart", "Your cart is empty. Add items before placing an order.");
-            return;
-        }
+//        if (cartService.isEmpty()) {
+//            showAlert(Alert.AlertType.WARNING, "Empty Cart", "Your cart is empty. Add items before placing an order.");
+//            return;
+//        }
 
         Map<Product, Integer> cartItems = new HashMap<>();
         Map<Integer, Integer> cart = cartService.getCart();

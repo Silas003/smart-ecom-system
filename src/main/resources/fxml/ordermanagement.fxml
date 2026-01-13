@@ -22,13 +22,13 @@
             <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS"
                        style="-fx-background-color: white; -fx-background-radius: 8;">
                 <columns>
-                    <TableColumn text="Order ID" prefWidth="120"/>
-                    <TableColumn text="Customer" prefWidth="200"/>
-                    <TableColumn text="Date" prefWidth="150"/>
-                    <TableColumn text="Total" prefWidth="100"/>
-                    <TableColumn text="Status" prefWidth="150"/>
-                    <TableColumn text="Items" prefWidth="80"/>
+                    <TableColumn fx:id="orderIdColumn" text="Order ID" prefWidth="120"/>
+                    <TableColumn fx:id="customerColumn" text="Customer" prefWidth="200"/>
+                    <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+                    <TableColumn fx:id="totalColumn" text="Total" prefWidth="100"/>
+                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="150"/>
                 </columns>
+
             </TableView>
 
             <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 15 0 0 0;">

@@ -73,6 +73,8 @@ public class LoginController {
             showAlert(Alert.AlertType.ERROR, "Authentication failed", ae.getMessage());
         } catch (DaoException de) {
             showAlert(Alert.AlertType.ERROR, "Error", "Login failed due to a server error.");
+        } catch (ValidationException e) {
+            throw new RuntimeException(e);
         }
     }
     @FXML

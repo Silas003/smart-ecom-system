@@ -104,8 +104,7 @@ public class SignUpController {
         } catch (DuplicateEntityException dee) {
             showAlert(Alert.AlertType.ERROR, "Error", "Signup failed. Email may already be registered.");
         } catch (ValidationException ve) {
-            String field = ve.getFieldName() == null ? "" : (" ("+ve.getFieldName()+")");
-            showAlert(Alert.AlertType.ERROR, "Validation error", ve.getMessage() + field);
+            showAlert(Alert.AlertType.ERROR, "Validation error", ve.getMessage() );
         } catch (DaoException de) {
             showAlert(Alert.AlertType.ERROR, "Error", "Signup failed due to a server error.");
         }

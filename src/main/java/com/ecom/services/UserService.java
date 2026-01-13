@@ -24,12 +24,12 @@ public class UserService {
         // default
     }
 
-    public static User login(String email,String password) throws InvalidInputException, AuthenticationException, DaoException {
+    public static User login(String email,String password) throws ValidationException, AuthenticationException, DaoException {
         // Basic validation
         ValidationUtils.requireNonEmpty(email, "email");
         ValidationUtils.requireNonEmpty(password, "password");
         if(!email.contains("@")){
-            throw new InvalidInputException("Invalid email format", "email", email);
+            throw new InvalidInputException("Invalid email format"+ email);
         }
         try {
             User user = UsersDao.getUserByEmail(email.toLowerCase());
@@ -64,7 +64,7 @@ public class UserService {
         try {
             // Check if email already exists
             if(UsersDao.emailExists(email)){
-                throw new DuplicateEntityException("User", "email", email);
+                throw new DuplicateEntityException("User with that email already exists");
             }
             // Hash the password before storing
             String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
@@ -99,7 +99,7 @@ public class UserService {
     }
 
     public static User getUserById(int id) throws DaoException, InvalidInputException {
-        if (id <= 0) throw new InvalidInputException("Invalid user id", "id", id);
+        if (id <= 0) throw new InvalidInputException("Invalid user id"+id );
         try {
             return UsersDao.getUserById(id);
         } catch (DaoException e) {
@@ -113,16 +113,15 @@ public class UserService {
         if (user == null) throw new InvalidInputException("User is required");
         ValidationUtils.requireNonEmpty(user.getUsername(), "username");
         ValidationUtils.requireEmail(user.getEmail(), "email");
-        // set default password if not provided
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
             user.setPassword(PasswordUtils.hashPassword("changeme"));
         } else {
-            // assume provided password is plaintext; hash it
+
             user.setPassword(PasswordUtils.hashPassword(user.getPassword()));
         }
         try {
             if (UsersDao.emailExists(user.getEmail())) {
-                throw new DuplicateEntityException("User", "email", user.getEmail());
+                throw new DuplicateEntityException("User with that email already exists");
             }
             UsersDao.createUser(user);
         } catch (DaoException e) {
@@ -131,30 +130,38 @@ public class UserService {
     }
 
     public static void updateUser(User user) throws ValidationException, DaoException {
-        if (user == null) throw new InvalidInputException("User is required");
-        if (user.getUserId() <= 0) throw new InvalidInputException("Invalid user id", "id", user.getUserId());
-        ValidationUtils.requireNonEmpty(user.getUsername(), "username");
-        ValidationUtils.requireEmail(user.getEmail(), "email");
+        if (user == null) throw new ValidationException("User object cannot be null.");
+
+        // Validate user fields
+        ValidationUtils.validatePositive(user.getUserId(), "User ID");
+        ValidationUtils.validateNotEmpty(user.getUsername(), "Username");
+        ValidationUtils.validateEmail(user.getEmail());
+        ValidationUtils.validateNotEmpty(user.getRole(), "Role");
+        ValidationUtils.validateRegex(user.getPhone(), "^\\+?[0-9]{10,15}$", "Phone number");
+
         try {
-            // ensure email uniqueness if changed
+            // Ensure email uniqueness if changed
             User existing = UsersDao.getUserById(user.getUserId());
             if (existing != null && !existing.getEmail().equalsIgnoreCase(user.getEmail())) {
                 if (UsersDao.emailExists(user.getEmail())) {
-                    throw new DuplicateEntityException("User", "email", user.getEmail());
+                    throw new DuplicateEntityException("User with that email already exists");
                 }
             }
-            // if password looks like plaintext (not containing $ used by our hash), hash it
+
+            // Hash password if it appears to be plaintext
             if (user.getPassword() != null && !user.getPassword().isEmpty() && !user.getPassword().contains("$")) {
                 user.setPassword(PasswordUtils.hashPassword(user.getPassword()));
             }
+
+            // Update user in the database
             UsersDao.updateUser(user);
         } catch (DaoException e) {
-            throw e;
+            throw new DaoException("Failed to update user: " + e.getMessage(), e);
         }
     }
 
     public static void deleteUser(int id) throws DaoException, InvalidInputException {
-        if (id <= 0) throw new InvalidInputException("Invalid user id", "id", id);
+        if (id <= 0) throw new InvalidInputException("Invalid user id" +id);
         try {
             UsersDao.deleteUser(id);
         } catch (DaoException e) {
