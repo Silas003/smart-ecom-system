@@ -4,19 +4,24 @@ import com.ecom.dao.OrderDao;
 import com.ecom.models.Order;
 import com.ecom.models.User;
 import com.ecom.utils.NavigationUtils;
+import com.ecom.utils.QueryTimer;
 import com.ecom.services.UserService;
+import com.ecom.services.PerformanceReportService;
 import com.ecom.exceptions.DaoException;
 import com.ecom.exceptions.InvalidInputException;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,15 +40,19 @@ public class AdminDashboardController {
     @FXML private TableView<Order> recentOrdersTable;
     @FXML private Label cacheHitsLabel;
     @FXML private Label cacheMissesLabel;
+    @FXML private Label performanceSummaryLabel;
+    @FXML private Label avgQueryTimeLabel;
 
     private final OrderDao orderDao = new OrderDao();
     private final com.ecom.services.ProductService productService = com.ecom.services.ProductService.getInstance();
+    private final PerformanceReportService performanceReportService = PerformanceReportService.getInstance();
 
     @FXML
     public void initialize() {
         configureRecentOrdersTable();
         loadDashboardDataAsync();
         updateCacheLabels();
+        updatePerformanceLabels();
     }
 
     private void configureRecentOrdersTable() {
@@ -146,10 +155,116 @@ public class AdminDashboardController {
         cacheMissesLabel.setText(String.valueOf(productService.getCacheMisses()));
     }
 
+    private void updatePerformanceLabels() {
+        Platform.runLater(() -> {
+            Map<String, QueryTimer.QueryMetrics> metrics = QueryTimer.getAllMetrics();
+            if (metrics.isEmpty()) {
+                if (avgQueryTimeLabel != null) {
+                    avgQueryTimeLabel.setText("No queries executed yet");
+                }
+                if (performanceSummaryLabel != null) {
+                    performanceSummaryLabel.setText("No performance data available");
+                }
+                return;
+            }
+
+            double totalAvg = metrics.values().stream()
+                .mapToDouble(QueryTimer.QueryMetrics::getAverageTimeMs)
+                .average()
+                .orElse(0.0);
+
+            if (avgQueryTimeLabel != null) {
+                avgQueryTimeLabel.setText(String.format("%.2f ms", totalAvg));
+            }
+
+            if (performanceSummaryLabel != null) {
+                String summary = performanceReportService.getSummary();
+                performanceSummaryLabel.setText(summary);
+            }
+        });
+    }
+
     @FXML
     private void handleClearCache() {
         productService.clearCache();
         updateCacheLabels();
+    }
+
+    @FXML
+    private void handleCaptureBaseline() {
+        performanceReportService.captureBaseline();
+        showAlert(Alert.AlertType.INFORMATION, "Baseline Captured", 
+            "Baseline metrics have been captured. Perform some operations, then capture optimized metrics.");
+        updatePerformanceLabels();
+    }
+
+    @FXML
+    private void handleCaptureOptimized() {
+        performanceReportService.captureOptimized();
+        showAlert(Alert.AlertType.INFORMATION, "Optimized Metrics Captured", 
+            "Optimized metrics captured. You can now generate a performance report.");
+        updatePerformanceLabels();
+    }
+
+    @FXML
+    private void handleGenerateReport() {
+        String report = performanceReportService.generateReport();
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Performance Report");
+        alert.setHeaderText("Query Performance Analysis");
+        
+        TextArea textArea = new TextArea(report);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefRowCount(25);
+        textArea.setPrefColumnCount(80);
+        
+        VBox vbox = new VBox(textArea);
+        vbox.setPrefWidth(700);
+        alert.getDialogPane().setContent(vbox);
+        alert.getDialogPane().setPrefWidth(750);
+        
+        Button saveButton = new Button("Save to File");
+        saveButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Performance Report");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+            fileChooser.setInitialFileName("performance_report_" + 
+                java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".txt");
+            
+            java.io.File file = fileChooser.showSaveDialog(alert.getOwner());
+            if (file != null) {
+                try {
+                    performanceReportService.saveReportToFile(file.getAbsolutePath());
+                    showAlert(Alert.AlertType.INFORMATION, "Success", 
+                        "Report saved to: " + file.getAbsolutePath());
+                } catch (IOException ex) {
+                    showAlert(Alert.AlertType.ERROR, "Error", 
+                        "Failed to save report: " + ex.getMessage());
+                }
+            }
+        });
+        
+        alert.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.OK);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void handleClearMetrics() {
+        QueryTimer.clearMetrics();
+        updatePerformanceLabels();
+        showAlert(Alert.AlertType.INFORMATION, "Metrics Cleared", 
+            "All query performance metrics have been cleared.");
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
@@ -174,6 +289,15 @@ public class AdminDashboardController {
     private void handleManageUsers() {
         try {
             NavigationUtils.navigate("usermanagement");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleManageCategories() {
+        try {
+            NavigationUtils.navigate("categorymanagement");
         } catch (IOException e) {
             e.printStackTrace();
         }

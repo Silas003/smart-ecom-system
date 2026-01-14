@@ -7,6 +7,7 @@ import com.ecom.models.Product;
 import com.ecom.models.Order;
 import com.ecom.models.OrderItem;
 import com.ecom.utils.DatabaseUtils;
+import com.ecom.utils.QueryTimer;
 import com.ecom.exceptions.DaoException;
 import com.ecom.exceptions.InsufficientInventoryException;
 
@@ -134,18 +135,20 @@ public class OrderDao {
   }
 
   public List<Order> findByUserId(int userId) throws SQLException {
-    List<Order> orders = new ArrayList<>();
-    String sql = "SELECT order_id, user_id, created_at,status, total_amount FROM orders WHERE user_id = ? ORDER BY created_at DESC";
-    try (Connection conn = DatabaseUtils.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(sql)) {
-      stmt.setInt(1, userId);
-      try (ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-          orders.add(mapResultSetToOrder(rs));
+    return QueryTimer.measure("order_findByUserId", () -> {
+      List<Order> orders = new ArrayList<>();
+      String sql = "SELECT order_id, user_id, created_at,status, total_amount FROM orders WHERE user_id = ? ORDER BY created_at DESC";
+      try (Connection conn = DatabaseUtils.getConnection();
+          PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, userId);
+        try (ResultSet rs = stmt.executeQuery()) {
+          while (rs.next()) {
+            orders.add(mapResultSetToOrder(rs));
+          }
         }
       }
-    }
-      return orders;
+        return orders;
+    });
   }
 
   public Order findById(int orderId) throws SQLException {
@@ -163,16 +166,18 @@ public class OrderDao {
   }
 
   public List<Order> findAll() throws SQLException {
-    List<Order> orders = new ArrayList<>();
-    String sql = "SELECT order_id, user_id,status, created_at, total_amount FROM orders ORDER BY created_at DESC";
-    try (Connection conn = DatabaseUtils.getConnection();
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(sql)) {
-      while (rs.next()) {
-        orders.add(mapResultSetToOrder(rs));
+    return QueryTimer.measure("order_findAll", () -> {
+      List<Order> orders = new ArrayList<>();
+      String sql = "SELECT order_id, user_id,status, created_at, total_amount FROM orders ORDER BY created_at DESC";
+      try (Connection conn = DatabaseUtils.getConnection();
+          Statement stmt = conn.createStatement();
+          ResultSet rs = stmt.executeQuery(sql)) {
+        while (rs.next()) {
+          orders.add(mapResultSetToOrder(rs));
+        }
       }
-    }
-      return orders;
+        return orders;
+    });
   }
 
   public List<OrderItem> findOrderItemsByOrderId(int orderId) throws SQLException {
