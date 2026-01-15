@@ -12,7 +12,6 @@ public class Main extends Application{
     @Override
     public void start(Stage primaryStage){
         NavigationUtils.setStage(primaryStage);
-
         try {
             NavigationUtils.navigate("login");
         } catch (IOException e) {

@@ -5,18 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bf09acb-e35a-4e31-933e-e7e3b3b87062" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/AccountController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/MyOrdersController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/fxml/account.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/fxml/myorders.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/ecom/dao/OrderDaoIT.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/ecom/dao/ProductDaoIT.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/ecom/dao/TestDb.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/ecom/dao/UsersDaoIT.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/ProductServiceTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/SessionServiceTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/resources/sql/schema.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/CategoryDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/CategoryDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/ProductDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/ProductDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/models/ReviewDocument.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/models/ReviewDocument.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/ProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/fxml/product.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/fxml/product.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/utils/DatabaseUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/utils/DatabaseUtils.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +65,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "feature/performance",
+    "git-widget-placeholder": "feature/testing",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "settings.editor.selected.configurable": "preferences.pluginManager",
