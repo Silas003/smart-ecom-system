@@ -8,6 +8,8 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Arrays;
 
 /**
  * NoSQL document model for reviews.
@@ -52,17 +54,28 @@ public class ReviewDocument {
     public Document toDocument() {
         Document doc = new Document();
         if (id != null && !id.isEmpty()) {
-            doc.append("_id", new ObjectId(id));
+            // store as ObjectId if valid, otherwise store raw string
+            if (ObjectId.isValid(id)) {
+                doc.append("_id", new ObjectId(id));
+            } else {
+                doc.append("_id", id);
+            }
         }
         doc.append("userId", userId)
            .append("productId", productId)
            .append("rating", rating)
-           .append("comment", comment)
-           .append("createdAt", Date.from(createdAt.atZone(ZoneId.systemDefault()).toInstant()))
-           .append("updatedAt", Date.from(updatedAt.atZone(ZoneId.systemDefault()).toInstant()))
-           .append("metadata", new Document(metadata))
+           .append("comment", comment);
+
+        if (createdAt != null) {
+            doc.append("createdAt", Date.from(createdAt.atZone(ZoneId.systemDefault()).toInstant()));
+        }
+        if (updatedAt != null) {
+            doc.append("updatedAt", Date.from(updatedAt.atZone(ZoneId.systemDefault()).toInstant()));
+        }
+
+        doc.append("metadata", new Document(metadata))
            .append("helpfulVotes", new Document(helpfulVotes))
-           .append("images", java.util.Arrays.asList(images))
+           .append("images", images != null ? Arrays.asList(images) : Collections.emptyList())
            .append("customFields", new Document(customFields));
         return doc;
     }
@@ -73,20 +86,29 @@ public class ReviewDocument {
     public static ReviewDocument fromDocument(Document doc) {
         ReviewDocument review = new ReviewDocument();
         if (doc.containsKey("_id")) {
-            review.id = doc.getObjectId("_id").toString();
+            Object idObj = doc.get("_id");
+            if (idObj instanceof ObjectId) {
+                review.id = ((ObjectId) idObj).toHexString();
+            } else if (idObj != null) {
+                review.id = idObj.toString();
+            }
         }
-        review.userId = doc.getInteger("userId");
-        review.productId = doc.getInteger("productId");
-        review.rating = doc.getInteger("rating");
+
+        Integer u = doc.get("userId", Integer.class);
+        review.userId = (u != null) ? u : 0;
+        Integer p = doc.get("productId", Integer.class);
+        review.productId = (p != null) ? p : 0;
+        Integer r = doc.get("rating", Integer.class);
+        review.rating = (r != null) ? r : 0;
         review.comment = doc.getString("comment");
         
-        if (doc.containsKey("createdAt")) {
-            Date createdAt = doc.getDate("createdAt");
-            review.createdAt = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.systemDefault());
+        Date createdAtDate = doc.getDate("createdAt");
+        if (createdAtDate != null) {
+            review.createdAt = LocalDateTime.ofInstant(createdAtDate.toInstant(), ZoneId.systemDefault());
         }
-        if (doc.containsKey("updatedAt")) {
-            Date updatedAt = doc.getDate("updatedAt");
-            review.updatedAt = LocalDateTime.ofInstant(updatedAt.toInstant(), ZoneId.systemDefault());
+        Date updatedAtDate = doc.getDate("updatedAt");
+        if (updatedAtDate != null) {
+            review.updatedAt = LocalDateTime.ofInstant(updatedAtDate.toInstant(), ZoneId.systemDefault());
         }
         
         if (doc.containsKey("metadata")) {
@@ -100,20 +122,38 @@ public class ReviewDocument {
             Document votesDoc = doc.get("helpfulVotes", Document.class);
             if (votesDoc != null) {
                 votesDoc.forEach((key, value) -> {
-                    review.helpfulVotes.put(key, (Integer) value);
+                    if (value == null) return;
+                    try {
+                        int intVal;
+                        if (value instanceof Number) {
+                            intVal = ((Number) value).intValue();
+                        } else {
+                            intVal = Integer.parseInt(String.valueOf(value));
+                        }
+                        review.helpfulVotes.put(key, intVal);
+                    } catch (NumberFormatException ex) {
+                        // skip invalid numeric value
+                    }
                 });
             }
         }
         
         if (doc.containsKey("images")) {
             java.util.List<String> imagesList = doc.getList("images", String.class);
-            review.images = imagesList.toArray(new String[0]);
+            if (imagesList != null) {
+                review.images = imagesList.toArray(new String[0]);
+            }
         }
         
         if (doc.containsKey("customFields")) {
             Document customDoc = doc.get("customFields", Document.class);
             if (customDoc != null) {
-                review.customFields.putAll(customDoc);
+                // Document is a Map<String,Object>, but customFields expects String values
+                customDoc.forEach((k, v) -> {
+                    if (v != null) {
+                        review.customFields.put(k, String.valueOf(v));
+                    }
+                });
             }
         }
         
@@ -142,18 +182,18 @@ public class ReviewDocument {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    public Map<String, Object> getMetadata() { return metadata; }
-    public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+    public Map<String, Object> getMetadata() { return new HashMap<>(metadata); }
+    public void setMetadata(Map<String, Object> metadata) { this.metadata = (metadata != null) ? new HashMap<>(metadata) : new HashMap<>(); }
 
-    public Map<String, Integer> getHelpfulVotes() { return helpfulVotes; }
-    public void setHelpfulVotes(Map<String, Integer> helpfulVotes) { this.helpfulVotes = helpfulVotes; }
+    public Map<String, Integer> getHelpfulVotes() { return new HashMap<>(helpfulVotes); }
+    public void setHelpfulVotes(Map<String, Integer> helpfulVotes) { this.helpfulVotes = (helpfulVotes != null) ? new HashMap<>(helpfulVotes) : new HashMap<>(); }
 
-    public String[] getImages() { return images; }
-    public void setImages(String[] images) { this.images = images; }
+    public String[] getImages() { return images == null ? new String[0] : images.clone(); }
+    public void setImages(String[] images) { this.images = (images != null) ? images.clone() : new String[0]; }
 
-    public Map<String, String> getCustomFields() { return customFields; }
-    public void setCustomFields(Map<String, String> customFields) { this.customFields = customFields; }
-    
+    public Map<String, String> getCustomFields() { return new HashMap<>(customFields); }
+    public void setCustomFields(Map<String, String> customFields) { this.customFields = (customFields != null) ? new HashMap<>(customFields) : new HashMap<>(); }
+
     /**
      * Adds a helpful vote from a user.
      */

@@ -13,8 +13,8 @@
                 <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
                 <Label text="Smart e-com" style="-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="My Account" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
-                <Button text="Orders" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
+                <Button text="My Account" onAction="#handleMyAccount" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
+                <Button text="Orders" onAction="#handleOrders" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
                 <Button text="Cart" onAction="#handleViewCart" style="-fx-background-color: #ffc107; -fx-text-fill: #333; -fx-font-weight: bold; -fx-cursor: hand;">
                     <graphic>
                         <Label fx:id="cartCountLabel" text="0" style="-fx-text-fill: #333;"/>

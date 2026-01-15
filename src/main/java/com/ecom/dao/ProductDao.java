@@ -124,11 +124,14 @@ public class ProductDao {
         rs.getInt("stock_quantity"));
   }
 
-  // Search with pagination and sorting - placeholders and parameter indexes must match
-  public List<Product> search(String q, int offset, int limit, String sortBy, boolean asc) throws SQLException {
+  // Search with pagination, sorting and optional category filter
+  public List<Product> search(String q, Integer categoryId, int offset, int limit, String sortBy, boolean asc) throws SQLException {
     return QueryTimer.measure("product_search", () -> {
       List<Product> products = new ArrayList<>();
-      String base = "SELECT * FROM products WHERE LOWER(name) LIKE ? ";
+      StringBuilder base = new StringBuilder("SELECT * FROM products WHERE LOWER(name) LIKE ?");
+      if (categoryId != null) {
+        base.append(" AND category_id = ?");
+      }
       String order = "";
       if (sortBy != null && !sortBy.isBlank()) {
         // whitelist allowed sort columns
@@ -136,13 +139,17 @@ public class ProductDao {
           order = " ORDER BY " + sortBy + (asc ? " ASC" : " DESC");
         }
       }
-      String sql = base + order + " LIMIT ? OFFSET ?";
+      String sql = base.toString() + order + " LIMIT ? OFFSET ?";
       try (Connection conn = DatabaseUtils.getConnection();
            PreparedStatement stmt = conn.prepareStatement(sql)) {
+        int idx = 1;
         String like = "%" + (q == null ? "" : q.toLowerCase()) + "%";
-        stmt.setString(1, like);
-        stmt.setInt(2, limit);
-        stmt.setInt(3, offset);
+        stmt.setString(idx++, like);
+        if (categoryId != null) {
+          stmt.setInt(idx++, categoryId);
+        }
+        stmt.setInt(idx++, limit);
+        stmt.setInt(idx, offset);
         try (ResultSet rs = stmt.executeQuery()) {
           while (rs.next()) {
             products.add(mapResultSetToProduct(rs));
@@ -153,13 +160,16 @@ public class ProductDao {
     });
   }
 
-  public int count(String q) throws SQLException {
+  public int count(String q, Integer categoryId) throws SQLException {
     return QueryTimer.measure("product_count", () -> {
-      String sql = "SELECT COUNT(*) FROM products WHERE LOWER(name) LIKE ?";
+      StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products WHERE LOWER(name) LIKE ?");
+      if (categoryId != null) sql.append(" AND category_id = ?");
       try (Connection conn = DatabaseUtils.getConnection();
-           PreparedStatement stmt = conn.prepareStatement(sql)) {
+           PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        int idx = 1;
         String like = "%" + (q == null ? "" : q.toLowerCase()) + "%";
-        stmt.setString(1, like);
+        stmt.setString(idx++, like);
+        if (categoryId != null) stmt.setInt(idx++, categoryId);
         try (ResultSet rs = stmt.executeQuery()) {
           return rs.next() ? rs.getInt(1) : 0;
         }

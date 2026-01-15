@@ -15,7 +15,7 @@ import com.ecom.exceptions.ValidationException;
 public class ProductService {
     private final ProductDao productDAO;
     private final Map<Integer, Product> productCache;
-    private final Map<String, List<Product>> listCache; // key: q|page|pageSize|sort|asc
+    private final Map<String, List<Product>> listCache; // key: q|category|page|pageSize|sort|asc
 
     private static final ProductService INSTANCE = new ProductService(new ProductDao());
     public static ProductService getInstance() { return INSTANCE; }
@@ -33,19 +33,23 @@ public class ProductService {
         this.listCache = new ConcurrentHashMap<>();
     }
 
-    private String cacheKey(String q, int page, int pageSize, String sortBy, boolean asc) {
-        return (q == null ? "" : q.toLowerCase()) + "|" + page + "|" + pageSize + "|" + sortBy + "|" + asc;
+    private String cacheKey(String q, Integer categoryId, int page, int pageSize, String sortBy, boolean asc) {
+        return (q == null ? "" : q.toLowerCase()) + "|" + (categoryId == null ? "" : categoryId) + "|" + page + "|" + pageSize + "|" + sortBy + "|" + asc;
     }
 
     public List<Product> search(String q, int page, int pageSize, String sortBy, boolean asc, boolean useCache) throws SQLException {
-        String key = cacheKey(q, page, pageSize, sortBy, asc);
+        return search(q, null, page, pageSize, sortBy, asc, useCache);
+    }
+
+    public List<Product> search(String q, Integer categoryId, int page, int pageSize, String sortBy, boolean asc, boolean useCache) throws SQLException {
+        String key = cacheKey(q, categoryId, page, pageSize, sortBy, asc);
         if (useCache && listCache.containsKey(key)) {
             recordCacheHit();
             return listCache.get(key);
         }
         recordCacheMiss();
         int offset = page * pageSize;
-        List<Product> results = productDAO.search(q, offset, pageSize, sortBy, asc);
+        List<Product> results = productDAO.search(q, categoryId, offset, pageSize, sortBy, asc);
         listCache.put(key, results);
         results.forEach(p -> productCache.put(p.getProductId(), p));
         return results;
@@ -65,7 +69,11 @@ public class ProductService {
     public int getProductCacheSize() { return productCache.size(); }
 
     public int count(String q) throws SQLException {
-        return productDAO.count(q);
+        return count(q, null);
+    }
+
+    public int count(String q, Integer categoryId) throws SQLException {
+        return productDAO.count(q, categoryId);
     }
 
     public Product getProductById(int id) throws SQLException {

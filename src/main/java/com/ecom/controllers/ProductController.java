@@ -115,6 +115,44 @@ public class ProductController {
     }
 
     @FXML
+    private void handleMyAccount() {
+        // Navigate to account page; require login
+        com.ecom.services.SessionService session = com.ecom.services.SessionService.getInstance();
+        if (!session.isLoggedIn()) {
+            try {
+                NavigationUtils.navigate("login");
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open login: " + e.getMessage());
+            }
+            return;
+        }
+        try {
+            NavigationUtils.navigate("account");
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open account: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleOrders() {
+        // Navigate to user's orders; require login
+        com.ecom.services.SessionService session = com.ecom.services.SessionService.getInstance();
+        if (!session.isLoggedIn()) {
+            try {
+                NavigationUtils.navigate("login");
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open login: " + e.getMessage());
+            }
+            return;
+        }
+        try {
+            NavigationUtils.navigate("myorders");
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Unable to open orders: " + e.getMessage());
+        }
+    }
+
+    @FXML
     private void handleAddToCart(Product product) {
         if (product.getStockQuantity() <= 0) {
             showAlert(Alert.AlertType.WARNING, "Out of Stock", "This product is currently out of stock.");
@@ -133,7 +171,7 @@ public class ProductController {
     }
 
     private void loadProductsAsync(int pageIndex) {
-        String q = searchField.getText().trim();
+        String q = (searchField != null && searchField.getText() != null) ? searchField.getText().trim() : "";
         String sortBy = null;
         boolean asc = true;
         switch (sortComboBox.getValue()) {
@@ -147,6 +185,8 @@ public class ProductController {
         final String sSortBy = sortBy;
         final boolean sAsc = asc;
 
+        Integer selectedCategory = getSelectedCategoryId();
+
         progress.setVisible(true);
         productGrid.setDisable(true);
 
@@ -157,8 +197,8 @@ public class ProductController {
             @Override
             protected Void call() {
                 try {
-                    results = productService.search(q, pageIndex, pageSize, sSortBy, sAsc, true);
-                    total = productService.count(q);
+                    results = productService.search(q, selectedCategory, pageIndex, pageSize, sSortBy, sAsc, true);
+                    total = productService.count(q, selectedCategory);
                 } catch (SQLException ex) {
                     results = List.of();
                     total = 0;
@@ -284,7 +324,7 @@ public class ProductController {
     }
 
     private Integer getSelectedCategoryId() {
-        String selected = categoryComboBox.getValue();
+        String selected = (categoryComboBox != null) ? categoryComboBox.getValue() : null;
 
         if (selected == null || selected.equals("All Categories")) {
             return null;
