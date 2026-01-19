@@ -59,13 +59,15 @@ public class OrderDao {
       String insertItemSQL =
           "INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?,"
               + " ?, ?, ?)";
-      // This query ensures we don't sell more than we have
-      String updateStockSQL =
-          "UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ? AND"
-              + " stock_quantity >= ?";
+      // Try to update inventory table first, then fallback to products table
+      String updateInventorySQL =
+          "UPDATE inventory SET quantity_in_stock = quantity_in_stock - ? WHERE product_id = ? AND quantity_in_stock >= ?";
+      String updateProductsSQL =
+          "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?";
 
       itemStmt = conn.prepareStatement(insertItemSQL);
-      stockStmt = conn.prepareStatement(updateStockSQL);
+      PreparedStatement invStmt = conn.prepareStatement(updateInventorySQL);
+      PreparedStatement prodStmt = conn.prepareStatement(updateProductsSQL);
 
       for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
         Product product = entry.getKey();
@@ -78,14 +80,20 @@ public class OrderDao {
         itemStmt.setDouble(4, product.getPrice());
         itemStmt.addBatch();
 
-        // Update Stock (Immediate execution to check constraints)
-        stockStmt.setInt(1, quantity);
-        stockStmt.setInt(2, product.getProductId());
-        stockStmt.setInt(3, quantity); // Check if stock >= quantity
-        int stockRows = stockStmt.executeUpdate();
-
-        if (stockRows == 0) {
-          throw new InsufficientInventoryException(product.getProductId(), quantity, 0);
+        // Update Inventory (try inventory first)
+        invStmt.setInt(1, quantity);
+        invStmt.setInt(2, product.getProductId());
+        invStmt.setInt(3, quantity);
+        int invRows = invStmt.executeUpdate();
+        if (invRows == 0) {
+          // fallback to products table update
+          prodStmt.setInt(1, quantity);
+          prodStmt.setInt(2, product.getProductId());
+          prodStmt.setInt(3, quantity);
+          int prodRows = prodStmt.executeUpdate();
+          if (prodRows == 0) {
+            throw new InsufficientInventoryException(product.getProductId(), quantity, 0);
+          }
         }
       }
 
@@ -182,7 +190,7 @@ public class OrderDao {
 
   public List<OrderItem> findOrderItemsByOrderId(int orderId) throws SQLException {
     List<OrderItem> items = new ArrayList<>();
-    String sql = "SELECT id, order_id, product_id,quantity, price_at_purchase FROM order_items WHERE order_id = ?";
+    String sql = "SELECT id, order_id, product_id, quantity, unit_price FROM order_items WHERE order_id = ?";
     try (Connection conn = DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setInt(1, orderId);

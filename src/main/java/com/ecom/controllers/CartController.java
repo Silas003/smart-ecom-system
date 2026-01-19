@@ -3,6 +3,7 @@ package com.ecom.controllers;
 import com.ecom.models.Product;
 import com.ecom.services.CartService;
 import com.ecom.services.ProductService;
+import com.ecom.services.SessionService;
 import com.ecom.utils.NavigationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -48,10 +49,20 @@ public class CartController {
             return;
         }
         try {
+
+            SessionService session = com.ecom.services.SessionService.getInstance();
+            if (!session.isLoggedIn()) {
+                System.out.println("CartController: user not logged in, setting pendingFxml=checkout and navigating to login");
+                session.setPendingFxml("checkout");
+                NavigationUtils.navigate("login");
+                return;
+            } else {
+                session.clearPendingFxml();
+            }
+
             NavigationUtils.navigate("checkout");
         } catch (IOException e) {
              showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
-
         }
     }
 

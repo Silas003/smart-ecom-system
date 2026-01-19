@@ -58,7 +58,7 @@ public class OrderManagementController {
             }
         });
 
-        statusFilter.setItems(FXCollections.observableArrayList("All Orders"));
+        statusFilter.setItems(FXCollections.observableArrayList("All Orders","processing", "delivered", "cancelled"));
         statusFilter.setValue("All Orders");
         loadOrders();
     }

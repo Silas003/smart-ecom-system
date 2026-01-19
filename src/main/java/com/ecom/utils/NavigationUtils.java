@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
@@ -27,9 +28,18 @@ public class NavigationUtils {
         if (currentFxml != null && !currentFxml.equals(fxml)) {
             history.push(currentFxml);
         }
-        Parent root = FXMLLoader.load(NavigationUtils.class.getResource("/fxml/" + fxml + ".fxml"));
-        stage.setScene(new Scene(root));
-        currentFxml = fxml;
+        URL resource = NavigationUtils.class.getResource("/fxml/" + fxml + ".fxml");
+        if (resource == null) {
+            throw new IOException("FXML resource not found for: /fxml/" + fxml + ".fxml");
+        }
+        try {
+            Parent root = FXMLLoader.load(resource);
+            stage.setScene(new Scene(root));
+            currentFxml = fxml;
+        } catch (RuntimeException | IOException e) {
+            IOException ioe = new IOException("Failed to load FXML '/fxml/" + fxml + ".fxml': " + e.getMessage(), e);
+            throw ioe;
+        }
     }
 
     public static boolean canGoBack() {
@@ -40,7 +50,11 @@ public class NavigationUtils {
         if (history.isEmpty()) return; // nothing to do
         String prev = history.pop();
         // set current to previous and load
-        Parent root = FXMLLoader.load(NavigationUtils.class.getResource("/fxml/" + prev + ".fxml"));
+        URL resource = NavigationUtils.class.getResource("/fxml/" + prev + ".fxml");
+        if (resource == null) {
+            throw new IOException("FXML resource not found for: /fxml/" + prev + ".fxml");
+        }
+        Parent root = FXMLLoader.load(resource);
         stage.setScene(new Scene(root));
         currentFxml = prev;
     }
@@ -50,8 +64,19 @@ public class NavigationUtils {
      */
     public static void navigateNoHistory(String fxml) throws IOException {
         Objects.requireNonNull(stage, "Stage not set in NavigationUtils. Call setStage(...) first.");
-        Parent root = FXMLLoader.load(NavigationUtils.class.getResource("/fxml/" + fxml + ".fxml"));
+        URL resource = NavigationUtils.class.getResource("/fxml/" + fxml + ".fxml");
+        if (resource == null) {
+            throw new IOException("FXML resource not found for: /fxml/" + fxml + ".fxml");
+        }
+        Parent root = FXMLLoader.load(resource);
         stage.setScene(new Scene(root));
         currentFxml = fxml;
+    }
+
+    /**
+     * Check whether an FXML resource exists on the classpath.
+     */
+    public static boolean fxmlExists(String fxml) {
+        return NavigationUtils.class.getResource("/fxml/" + fxml + ".fxml") != null;
     }
 }

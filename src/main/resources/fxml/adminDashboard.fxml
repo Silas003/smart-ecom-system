@@ -9,7 +9,8 @@
 
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 20; -fx-background-color: #343a40;">
-            <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: #ffffff; -fx-text-fill: white; -fx-font-weight: bold;
+                                  -fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 16px;"/>
             <Label text="Admin Dashboard" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Manage Products" onAction="#handleManageProducts"

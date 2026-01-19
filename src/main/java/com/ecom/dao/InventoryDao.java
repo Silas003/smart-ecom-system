@@ -1,5 +1,6 @@
 package com.ecom.dao;
 
+import com.ecom.exceptions.InsufficientInventoryException;
 import com.ecom.utils.DatabaseUtils;
 
 import java.sql.Connection;
@@ -7,78 +8,84 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Inventory DAO that operates on inventory.quantity_in_stock as the source of truth.
+ */
 public class InventoryDao {
-    private static Connection connection = null;
-    public InventoryDao(Connection conn){
-        this.connection = conn;
+
+    public InventoryDao() {
+        // stateless, uses DatabaseUtils per-call
     }
 
-    public static void create(String proudct_id, String quantity_in_stock, String quantity_reserved, String stock_status){
-        String sql = "insert into inventory(prodcut_id,quantity_in_stock,quantity_reserved,stock_status) values(?,?,?,?)";
-        try(Connection conn = connection){
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setString(1,proudct_id);
-            preparedStatement.setString(2,quantity_in_stock);
-            preparedStatement.setString(3,quantity_reserved);
-            preparedStatement.setString(4,stock_status);
-            int rd = preparedStatement.executeUpdate();
-            if(rd > 0)
-                System.out.println("Inventory created successfully.");
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public static void read(){
-        String sql = "select inventory_id,product_id,quantity_in_stock,quantity_in_reserved,stock_status from inventory";
-        try(Connection conn = connection){
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()){
-                System.out.println("User ID: " + rs.getInt("product_id"));
-                System.out.println("Username: " + rs.getString("username"));
-                System.out.println("Phone: " + rs.getString("phone"));
-                System.out.println("Email: " + rs.getString("email"));
-                System.out.println("---------------------------");
+    /**
+     * Get current stock quantity for a product. Prefer inventory.quantity_in_stock, fall back to products.stock_quantity.
+     */
+    public int getStock(int productId) throws SQLException {
+        String sql = "SELECT COALESCE(i.quantity_in_stock, p.stock_quantity, 0) AS available FROM products p LEFT JOIN inventory i ON p.id = i.product_id WHERE p.product_id = ?";
+        try (Connection conn = DatabaseUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("available");
+                return 0;
             }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
-
     }
 
-    public static void update(int quantity,int id){
-        String sql = "update inventory set quantity_in_stock=? where id=?";
-        try(Connection conn = connection){
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
-
-            preparedStatement.setInt(1,quantity);
-                preparedStatement.setInt(2,id);
-            int rd = preparedStatement.executeUpdate();
-            if(rd > 0)
-                System.out.println("inventory updated successfully.");
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    /**
+     * Atomically decrease inventory.quantity_in_stock by qty if available; otherwise throws InsufficientInventoryException.
+     */
+    public void decreaseStock(int productId, int qty) throws SQLException, InsufficientInventoryException {
+        if (qty <= 0) return;
+        // Try to update inventory row first
+        String sql = "UPDATE inventory SET quantity_in_stock = quantity_in_stock - ? WHERE id = ? AND quantity_in_stock >= ?";
+        try (Connection conn = DatabaseUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, qty);
+            ps.setInt(2, productId);
+            ps.setInt(3, qty);
+            int updated = ps.executeUpdate();
+            if (updated > 0) return; // success
         }
-
+        // Fallback: try to decrease products.stock_quantity if inventory row missing or didn't have enough
+        String sql2 = "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?";
+        try (Connection conn = DatabaseUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql2)) {
+            ps.setInt(1, qty);
+            ps.setInt(2, productId);
+            ps.setInt(3, qty);
+            int updated = ps.executeUpdate();
+            if (updated > 0) return;
+        }
+        int available = getStock(productId);
+        throw new InsufficientInventoryException(productId, qty, available);
     }
 
-    public static void delete(int id){
-        String sql = "delete from inventory where id=?";
-        try(Connection conn = connection){
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setInt(1,id);
-            int rd = preparedStatement.executeUpdate();
-            if(rd > 0)
-                System.out.println("inventory deleted successfully.");
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    /**
+     * Increase inventory.quantity_in_stock by qty (create inventory row if needed).
+     */
+    public void increaseStock(int productId, int qty) throws SQLException {
+        if (qty <= 0) return;
+        // Use Postgres upsert to insert or update inventory row
+        String upsert = "INSERT INTO inventory (product_id, quantity_in_stock) VALUES (?, ?) ON CONFLICT (product_id) DO UPDATE SET quantity_in_stock = inventory.quantity_in_stock + EXCLUDED.quantity_in_stock";
+        try (Connection conn = DatabaseUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(upsert)) {
+            ps.setInt(1, productId);
+            ps.setInt(2, qty);
+            ps.executeUpdate();
         }
+    }
 
+    /**
+     * Set absolute inventory quantity for a product (admin operation).
+     */
+    public void setStock(int productId, int qty) throws SQLException {
+        String upsert = "INSERT INTO inventory (product_id, quantity_in_stock) VALUES (?, ?) ON CONFLICT (product_id) DO UPDATE SET quantity_in_stock = EXCLUDED.quantity_in_stock";
+        try (Connection conn = DatabaseUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(upsert)) {
+            ps.setInt(1, productId);
+            ps.setInt(2, qty);
+            ps.executeUpdate();
+        }
     }
 }

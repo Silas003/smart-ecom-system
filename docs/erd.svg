@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <style> .tbl { fill:#fff; stroke:#2c3e50; stroke-width:1.5 } .title{ font: bold 14px sans-serif; fill:#2c3e50 } .col{ font: 12px monospace; fill:#34495e } .fk{ stroke:#e67e22 } </style>
+
+  <!-- Users -->
+  <rect x="40" y="40" width="220" height="80" rx="6" ry="6" class="tbl"/>
+  <text x="52" y="60" class="title">users</text>
+  <text x="52" y="80" class="col">id (PK)</text>
+  <text x="140" y="80" class="col">email (UNQ)</text>
+
+  <!-- Categories -->
+  <rect x="300" y="40" width="220" height="80" rx="6" ry="6" class="tbl"/>
+  <text x="312" y="60" class="title">categories</text>
+  <text x="312" y="80" class="col">category_id (PK)</text>
+  <text x="420" y="80" class="col">name (UNQ)</text>
+
+  <!-- Products -->
+  <rect x="40" y="160" width="360" height="120" rx="6" ry="6" class="tbl"/>
+  <text x="52" y="180" class="title">products</text>
+  <text x="52" y="200" class="col">product_id (PK)</text>
+  <text x="52" y="220" class="col">category_id (FK → categories.category_id)</text>
+  <text x="52" y="240" class="col">name (UNQ lower)</text>
+
+  <!-- Inventory -->
+  <rect x="440" y="160" width="260" height="80" rx="6" ry="6" class="tbl"/>
+  <text x="452" y="180" class="title">inventory</text>
+  <text x="452" y="200" class="col">inventory_id (PK)</text>
+  <text x="560" y="200" class="col">product_id (FK, UNIQUE)</text>
+
+  <!-- Orders -->
+  <rect x="40" y="320" width="300" height="100" rx="6" ry="6" class="tbl"/>
+  <text x="52" y="340" class="title">orders</text>
+  <text x="52" y="360" class="col">order_id (PK)</text>
+  <text x="52" y="380" class="col">user_id (FK → users.id)</text>
+
+  <!-- Order Items -->
+  <rect x="380" y="320" width="320" height="120" rx="6" ry="6" class="tbl"/>
+  <text x="392" y="340" class="title">order_items</text>
+  <text x="392" y="360" class="col">id (PK)</text>
+  <text x="392" y="380" class="col">order_id (FK → orders.order_id)</text>
+  <text x="392" y="400" class="col">product_id (FK → products.product_id)</text>
+
+  <!-- Reviews -->
+  <rect x="40" y="460" width="300" height="80" rx="6" ry="6" class="tbl"/>
+  <text x="52" y="480" class="title">reviews</text>
+  <text x="52" y="500" class="col">review_id (PK)</text>
+  <text x="52" y="520" class="col">product_id (FK → products.product_id)</text>
+
+  <!-- Relationships (lines) -->
+  <line x1="360" y1="200" x2="440" y2="200" stroke="#2c3e50" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="180" y1="320" x2="180" y2="320" stroke="#2c3e50"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#2c3e50" />
+    </marker>
+  </defs>
+
+</svg>

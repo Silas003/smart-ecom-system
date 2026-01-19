@@ -57,6 +57,20 @@ public class LoginController {
                 showAlert(Alert.AlertType.INFORMATION, "Success",
                         "Login successful!\nEmail: " + email);
                 try {
+
+                    SessionService session = SessionService.getInstance();
+                    String pending = session.getPendingFxml();
+                    if (pending != null && !pending.isBlank()) {
+                        if (com.ecom.utils.NavigationUtils.fxmlExists(pending)) {
+                            session.clearPendingFxml();
+                            NavigationUtils.navigate(pending);
+                            return;
+                        } else {
+                            session.clearPendingFxml();
+                            showAlert(Alert.AlertType.WARNING, "Navigation Error", "The requested page is unavailable: " + pending);
+                        }
+                    }
+
                     if (user.getRole().equalsIgnoreCase("admin")) {
                         NavigationUtils.navigate("adminDashboard");
                     } else {
