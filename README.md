@@ -12,31 +12,31 @@ This README provides setup and run instructions, environment variables, database
 - psql client (for applying SQL scripts)
 
 ## Environment variables
-- `DB_URL` (default: `jdbc:postgresql://localhost:5432/smartEcom`)
-- `DB_USERNAME` (default: `postgres`)
-- `DB_PASSWORD` (default: `Drake@7890`)
-- `MONGO_URL` (default: `mongodb://localhost:27017`)
-- `MONGO_DB_NAME` (default: `smartEcom`)
+- `DB_URL` 
+- `DB_USERNAME` 
+- `DB_PASSWORD` 
+- `MONGO_URL`
+- `MONGO_DB_NAME`
 
 ## Quick setup (PowerShell)
 1. Create the PostgreSQL database (run as a user with CREATE DATABASE privileges):
 
    ```bash
    # Create database and owner (adjust as needed)
-   psql -U postgres -c "CREATE DATABASE \"smartEcom\";"
+   psql -U postgres -c "CREATE DATABASE \"${dbName}\";"
    ```
 
 2. Apply the schema (production-ready SQL provided):
 
    ```bash
    # From repo root (adjust path if needed)
-   psql -U $env:DB_USERNAME -d smartEcom -f src/main/resources/sql/schema_postgres.sql
+   psql -U $env:DB_USERNAME -d ${dbName} -f src/main/resources/sql/schema_postgres.sql
    ```
 
 3. Create indexes (recommended after schema + sample data loaded):
 
    ```bash
-   psql -U $env:DB_USERNAME -d smartEcom -f src/main/resources/sql/create_indexes.sql
+   psql -U $env:DB_USERNAME -d ${dbName} -f src/main/resources/sql/create_indexes.sql
    ```
 
 4. Start MongoDB (optional for reviews/logs):
@@ -58,14 +58,14 @@ docker-compose down
 After starting Postgres, apply schema and seed data (PowerShell example):
 
 ```powershell
-$env:DB_USERNAME = 'postgres'
-$env:DB_PASSWORD = 'Drake@7890'
+$env:DB_USERNAME = your db username
+$env:DB_PASSWORD = your db password
 # Apply schema
-psql -U $env:DB_USERNAME -d smartEcom -f src/main/resources/sql/schema_postgres.sql
+psql -U $env:DB_USERNAME -d ${dbName} -f src/main/resources/sql/schema_postgres.sql
 # Seed sample data
-psql -U $env:DB_USERNAME -d smartEcom -f src/main/resources/sql/seed_sample_data.sql
+psql -U $env:DB_USERNAME -d ${dbName} -f src/main/resources/sql/seed_sample_data.sql
 # Create indexes
-psql -U $env:DB_USERNAME -d smartEcom -f src/main/resources/sql/create_indexes.sql
+psql -U $env:DB_USERNAME -d ${dbName} -f src/main/resources/sql/create_indexes.sql
 ```
 
 See `docker-compose.yml` for credentials and ports.
@@ -96,9 +96,9 @@ This project includes Flyway migrations located at `src/main/resources/db/migrat
 Run migrations with Maven (PowerShell):
 
 ```powershell
-$env:DB_URL = 'jdbc:postgresql://localhost:5432/smartEcom'
-$env:DB_USERNAME = 'postgres'
-$env:DB_PASSWORD = 'Drake@7890'
+$env:DB_URL = 'jdbc:postgresql://localhost:5432/${dbName}'
+$env:DB_USERNAME = <your db username>
+$env:DB_PASSWORD = <your db password>
 # Run Flyway migrate
 mvn flyway:migrate
 ```
