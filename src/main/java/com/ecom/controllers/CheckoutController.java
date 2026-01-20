@@ -7,6 +7,7 @@ import com.ecom.services.ProductService;
 import com.ecom.services.SessionService;
 import com.ecom.utils.NavigationUtils;
 import com.ecom.dao.InventoryDao;
+import com.ecom.utils.ValidationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -20,17 +21,10 @@ import java.util.Map;
 
 public class CheckoutController {
 
-    @FXML private TextField fullNameField;
-    @FXML private TextField emailField;
-    @FXML private TextField phoneField;
-    @FXML private TextArea addressField;
     @FXML private TextField cityField;
     @FXML private TextField stateField;
+    @FXML private TextArea addressField;
     @FXML private TextField zipField;
-    @FXML private ComboBox<String> paymentMethodCombo;
-    @FXML private TextField cardNumberField;
-    @FXML private TextField expiryField;
-    @FXML private TextField cvvField;
     @FXML private Label orderTotalLabel;
     @FXML private Label subtotalLabel;
     @FXML private Label taxLabel;
@@ -60,46 +54,19 @@ public class CheckoutController {
             }
             return;
         }
-
-        paymentMethodCombo.getItems().addAll("Credit Card", "Debit Card", "PayPal");
-        paymentMethodCombo.setValue("Credit Card");
-
-
         updateOrderSummary();
     }
 
     @FXML
     private void handlePlaceOrder() {
-//        if (fullNameField.getText().trim().isEmpty() ||
-//            emailField.getText().trim().isEmpty() ||
-//            addressField.getText().trim().isEmpty() ||
-//            cityField.getText().trim().isEmpty() ||
-//            stateField.getText().trim().isEmpty() ||
-//            zipField.getText().trim().isEmpty()) {
-//            showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all required fields");
-//            return;
-//        }
-
-
-//        if (paymentMethodCombo.getValue() == null) {
-//            showAlert(Alert.AlertType.ERROR, "Error", "Please select a payment method");
-//            return;
-//        }
-
-        // Validate card details if credit/debit card
-//        if (paymentMethodCombo.getValue().contains("Card")) {
-//            if (cardNumberField.getText().trim().isEmpty() ||
-//                expiryField.getText().trim().isEmpty() ||
-//                cvvField.getText().trim().isEmpty()) {
-//                showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all payment details");
-//                return;
-//            }
-//        }
-
-//        if (cartService.isEmpty()) {
-//            showAlert(Alert.AlertType.WARNING, "Empty Cart", "Your cart is empty. Add items before placing an order.");
-//            return;
-//        }
+        if (
+            cityField.getText().trim().isEmpty() ||
+            stateField.getText().trim().isEmpty() ||
+            zipField.getText().trim().isEmpty() ||
+            addressField.getText().trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Please fill in all required fields");
+            return;
+        }
 
         Map<Product, Integer> cartItems = new HashMap<>();
         Map<Integer, Integer> cart = cartService.getCart();
@@ -128,7 +95,12 @@ public class CheckoutController {
                 }
                 return;
             }
-            boolean success = orderService.checkout(userId, cartItems);
+            String city = cityField.getText().trim();
+            String region = stateField.getText().trim();
+            String zip = zipField.getText().trim();
+            String address = addressField.getText().trim();
+            ValidationUtils.validateAdress(address,region ,city,zip);
+            boolean success = orderService.checkout(userId, cartItems, city, region, zip,address);
             if (success) {
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Order placed successfully!");
                 cartService.clearCart();
@@ -137,6 +109,7 @@ public class CheckoutController {
                 showAlert(Alert.AlertType.ERROR, "Error", "Failed to place order. Please try again.");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error", "Order placement failed: " + e.getMessage());
         }
     }
@@ -153,8 +126,8 @@ public class CheckoutController {
     @FXML
     private void handleBack() {
         try {
-            if (com.ecom.utils.NavigationUtils.canGoBack()) {
-                com.ecom.utils.NavigationUtils.goBack();
+            if (NavigationUtils.canGoBack()) {
+                NavigationUtils.goBack();
             } else {
                 handleBackToCart();
             }
@@ -212,7 +185,7 @@ public class CheckoutController {
             }
         }
 
-        double tax = subtotal * 0.08; // 8% tax
+        double tax = subtotal * 0.08;
         double total = subtotal + tax ;
 
 

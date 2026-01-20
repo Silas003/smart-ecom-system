@@ -62,6 +62,7 @@ public class CartController {
 
             NavigationUtils.navigate("checkout");
         } catch (IOException e) {
+            e.printStackTrace();
              showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
         }
     }

@@ -24,22 +24,6 @@
                         <Label text="Shipping Information" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
 
                         <VBox spacing="5">
-                            <Label text="Full Name *" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="fullNameField" promptText="Enter full name" prefHeight="35"/>
-                        </VBox>
-
-                        <HBox spacing="10">
-                            <VBox spacing="5" HBox.hgrow="ALWAYS">
-                                <Label text="Email *" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="emailField" promptText="Enter email" prefHeight="35"/>
-                            </VBox>
-                            <VBox spacing="5" HBox.hgrow="ALWAYS">
-                                <Label text="Phone *" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="phoneField" promptText="Enter phone" prefHeight="35"/>
-                            </VBox>
-                        </HBox>
-
-                        <VBox spacing="5">
                             <Label text="Address *" style="-fx-font-weight: bold;"/>
                             <TextArea fx:id="addressField" promptText="Enter shipping address" prefRowCount="3"/>
                         </VBox>
@@ -60,31 +44,7 @@
                         </HBox>
                     </VBox>
 
-                    <!-- Payment Information -->
-                    <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
-                        <Label text="Payment Information" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
 
-                        <VBox spacing="5">
-                            <Label text="Payment Method *" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="paymentMethodCombo" prefHeight="35" prefWidth="200"/>
-                        </VBox>
-
-                        <VBox spacing="5">
-                            <Label text="Card Number *" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="cardNumberField" promptText="1234 5678 9012 3456" prefHeight="35"/>
-                        </VBox>
-
-                        <HBox spacing="10">
-                            <VBox spacing="5" HBox.hgrow="ALWAYS">
-                                <Label text="Expiry Date *" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="expiryField" promptText="MM/YY" prefHeight="35"/>
-                            </VBox>
-                            <VBox spacing="5" HBox.hgrow="ALWAYS">
-                                <Label text="CVV *" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="cvvField" promptText="123" prefHeight="35"/>
-                            </VBox>
-                        </HBox>
-                    </VBox>
                 </VBox>
 
                 <!-- Order Summary -->

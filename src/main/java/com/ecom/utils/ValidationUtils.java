@@ -49,4 +49,15 @@ public class ValidationUtils {
     public static String trimToNull(String email) {
         return email.trim();
     }
+
+    public static void validateAdress(String address,String region,String city,String zipCode) throws ValidationException{
+        validateNotEmpty(address, "Address");
+        validateNotEmpty(region, "Region");
+        validateNotEmpty(city, "City");
+        validateNotEmpty(zipCode, "Zip Code");
+        validateRegex(zipCode, "^[0-9]{5}(?:-[0-9]{4})?$", "Zip Code");
+        validateRegex(city,"^[a-zA-Z\\s]+$", "City");
+        validateRegex(region,"^[a-zA-Z\\s]+$", "Region");
+        validateRegex(address,"^[a-zA-Z0-9\\s,.-]+$", "Address");
+    }
 }

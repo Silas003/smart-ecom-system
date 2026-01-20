@@ -21,7 +21,7 @@ public class InventoryDao {
      * Get current stock quantity for a product. Prefer inventory.quantity_in_stock, fall back to products.stock_quantity.
      */
     public int getStock(int productId) throws SQLException {
-        String sql = "SELECT COALESCE(i.quantity_in_stock, p.stock_quantity, 0) AS available FROM products p LEFT JOIN inventory i ON p.id = i.product_id WHERE p.product_id = ?";
+        String sql = "SELECT COALESCE(i.quantity_in_stock, p.stock_quantity, 0) AS available FROM products p LEFT JOIN inventory i ON p.id = i.product_id WHERE p.id = ?";
         try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);

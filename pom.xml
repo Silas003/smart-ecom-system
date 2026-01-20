@@ -73,12 +73,7 @@
             <artifactId>bson</artifactId>
             <version>4.11.1</version>
         </dependency>
-        <!-- Flyway for DB migrations -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>9.20.2</version>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -100,19 +95,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Flyway Maven plugin to run migrations during build or manually -->
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>9.20.2</version>
-                <configuration>
-                    <url>${env.DB_URL}</url>
-                    <user>${env.DB_USERNAME}</user>
-                    <password>${env.DB_PASSWORD}</password>
-                    <schemas>public</schemas>
-                    <locations>filesystem:src/main/resources/db/migration</locations>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>

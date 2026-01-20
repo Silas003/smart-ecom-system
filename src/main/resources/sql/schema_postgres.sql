@@ -57,6 +57,17 @@ CREATE TABLE IF NOT EXISTS order_items (
   unit_price NUMERIC(12,2) NOT NULL CHECK (unit_price >= 0)
 );
 
+-- Order address
+CREATE TABLE IF NOT EXISTS order_address (
+  id SERIAL PRIMARY KEY,
+  order_id INT NOT NULL REFERENCES orders(order_id) ON DELETE CASCADE,
+  city VARCHAR(255),
+  region VARCHAR(255),
+  zip_code VARCHAR(50),
+  user_id INT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
 -- Reviews (optional relational fallback)
 CREATE TABLE IF NOT EXISTS reviews (
   review_id SERIAL PRIMARY KEY,
@@ -72,6 +83,8 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_name_lower ON products (LOWER(name));
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders (user_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items (order_id);
+CREATE INDEX IF NOT EXISTS idx_order_address_order_id ON order_address(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_address_user_id ON order_address(user_id);
 
 -- ANALYZE to update planner statistics
 ANALYZE;

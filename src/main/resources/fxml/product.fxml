@@ -10,9 +10,6 @@
     <top>
         <VBox style="-fx-background-color: #007bff;">
             <HBox alignment="CENTER_LEFT" spacing="18" style="-fx-padding: 10; -fx-background-color: #007bff;">
-                <Button text="Back" onAction="#handleBack" style="-fx-background-color: #000000; -fx-text-fill: white; -fx-font-weight: bold;
-                                  -fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 16px;"/>
-                <Label text="Smart e-com" style="-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="My Account" onAction="#handleMyAccount" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>
                 <Button text="Orders" onAction="#handleOrders" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;"/>

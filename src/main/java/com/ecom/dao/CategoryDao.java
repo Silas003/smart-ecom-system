@@ -53,7 +53,7 @@ public class CategoryDao {
   }
 
   public void update(Category category) throws SQLException {
-    String sql = "UPDATE categories SET name = ? WHERE category_id = ?";
+    String sql = "UPDATE categories SET name = ? WHERE id = ?";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -64,7 +64,7 @@ public class CategoryDao {
   }
 
   public void delete(int id) throws SQLException {
-    String sql = "DELETE FROM categories WHERE category_id = ?";
+    String sql = "DELETE FROM categories WHERE id = ?";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -74,7 +74,7 @@ public class CategoryDao {
   }
 
   private Category mapResultSetToCategory(ResultSet rs) throws SQLException {
-    return new Category(rs.getInt("category_id"), rs.getString("name"));
+    return new Category(rs.getInt("id"), rs.getString("name"));
   }
     
 }

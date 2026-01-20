@@ -8,10 +8,10 @@
             fx:controller="com.ecom.controllers.AdminDashboardController" style="-fx-background-color: #f5f5f5;">
 
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 20; -fx-background-color: #343a40;">
-            <Button text="Back" onAction="#handleBack" style="-fx-background-color: #ffffff; -fx-text-fill: white; -fx-font-weight: bold;
-                                  -fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 16px;"/>
-            <Label text="Admin Dashboard" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <HBox alignment="CENTER_LEFT" spacing="18" style="-fx-padding: 18; -fx-background-color: #343a40;">
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: #000000; -fx-text-fill: white; -fx-font-weight: bold;
+                                  -fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 14px;"/>
+            <Label text="Admin Dashboard" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Manage Products" onAction="#handleManageProducts"
                     style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-cursor: hand;"/>

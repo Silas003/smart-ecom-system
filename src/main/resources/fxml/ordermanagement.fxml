@@ -32,6 +32,7 @@
 
             </TableView>
 
+
             <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 15 0 0 0;">
                 <Button text="View Details" onAction="#handleViewOrder" prefWidth="120"
                         style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-cursor: hand;"/>
