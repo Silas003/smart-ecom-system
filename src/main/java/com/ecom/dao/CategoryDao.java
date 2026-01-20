@@ -20,13 +20,11 @@ public class CategoryDao {
           category.setCategoryId(generatedKeys.getInt(1));
         }
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
   public Category findById(int id) throws SQLException {
-    String sql = "SELECT * FROM categories WHERE category_id = ?";
+    String sql = "SELECT * FROM categories WHERE id = ?";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -36,8 +34,6 @@ public class CategoryDao {
           return mapResultSetToCategory(rs);
         }
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
       return null;
   }
@@ -52,39 +48,33 @@ public class CategoryDao {
       while (rs.next()) {
         categories.add(mapResultSetToCategory(rs));
       }
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
       return categories;
   }
 
   public void update(Category category) throws SQLException {
-    String sql = "UPDATE categories SET name = ? WHERE category_id = ?";
+    String sql = "UPDATE categories SET name = ? WHERE id = ?";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
       stmt.setString(1, category.getName());
       stmt.setInt(2, category.getCategoryId());
       stmt.executeUpdate();
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
   public void delete(int id) throws SQLException {
-    String sql = "DELETE FROM categories WHERE category_id = ?";
+    String sql = "DELETE FROM categories WHERE id = ?";
     try (Connection conn =  DatabaseUtils.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql)) {
 
       stmt.setInt(1, id);
       stmt.executeUpdate();
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
     }
   }
 
   private Category mapResultSetToCategory(ResultSet rs) throws SQLException {
-    return new Category(rs.getInt("category_id"), rs.getString("name"));
+    return new Category(rs.getInt("id"), rs.getString("name"));
   }
     
 }

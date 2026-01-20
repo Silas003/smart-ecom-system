@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ecom.controllers.UserManagementController" style="-fx-background-color: #f5f5f5;">
+
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 20; -fx-background-color: white;">
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;"/>
+            <Label text="User Management" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Add User" onAction="#handleAddUser" style="-fx-background-color: #28a745; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="10" style="-fx-padding: 20;">
+            <HBox spacing="10">
+                <TextField fx:id="searchField" promptText="Search users..." prefWidth="400"/>
+                <Button text="Search" onAction="#handleSearch" style="-fx-background-color: #007bff; -fx-text-fill: white;"/>
+            </HBox>
+
+            <TableView fx:id="usersTable" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8;">
+                <columns>
+                    <TableColumn fx:id="idColumn" text="ID" prefWidth="80"/>
+                    <TableColumn fx:id="usernameColumn" text="Username" prefWidth="200"/>
+                    <TableColumn fx:id="emailColumn" text="Email" prefWidth="220"/>
+                    <TableColumn fx:id="phoneColumn" text="Phone" prefWidth="140"/>
+                    <TableColumn fx:id="roleColumn" text="Role" prefWidth="120"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="Edit" onAction="#handleEditUser" style="-fx-background-color: #007bff; -fx-text-fill: white;"/>
+                <Button text="Delete" onAction="#handleDeleteUser" style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

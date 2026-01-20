@@ -1,9 +1,29 @@
 package com.ecom;
+import java.io.IOException;
 
-import com.ecom.services.OrderService;
+import com.ecom.utils.NavigationUtils;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class Main {
+public class Main extends Application{
+    @Override
+    public void start(Stage primaryStage){
+        NavigationUtils.setStage(primaryStage);
+
+        try {
+            NavigationUtils.navigate("login");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        primaryStage.setTitle("ecom");
+        primaryStage.show();
+    }
+
     public static void main(String[] args) {
-        OrderService.main(args);
+        launch(args);
     }
 }

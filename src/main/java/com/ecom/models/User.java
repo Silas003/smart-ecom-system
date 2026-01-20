@@ -3,22 +3,25 @@ package com.ecom.models;
 
 public class User {
     private int userId;
+    private String username;
     private String email;
-    private String passwordHash;
+    private String phone;
+    private String password;
     private String role;
   
     public User() {}
   
-    public User(int userId, String email, String passwordHash, String role) {
+    public User(int userId,String username,String phone ,String email, String role) {
       this.userId = userId;
       this.email = email;
-      this.passwordHash = passwordHash;
       this.role = role;
+      this.phone = phone;
+      this.username = username;
     }
   
-    public User(String email, String passwordHash, String role) {
+    public User(String email, String password, String role) {
       this.email = email;
-      this.passwordHash = passwordHash;
+      this.password = password;
       this.role = role;
     }
   
@@ -38,12 +41,12 @@ public class User {
       this.email = email;
     }
   
-    public String getPasswordHash() {
-      return passwordHash;
+    public String getPassword() {
+      return password;
     }
   
-    public void setPasswordHash(String passwordHash) {
-      this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+      this.password = password;
     }
   
     public String getRole() {
@@ -53,7 +56,20 @@ public class User {
     public void setRole(String role) {
       this.role = role;
     }
-  
+    
+    public String getPhone(){
+      return this.phone;
+    }
+
+    public void setPhone(String phone){
+      this.phone = phone;
+    }
+    public void setUsername(String username){
+      this.username = username;
+    }
+    public String getUsername(){
+      return this.username;
+    }
     @Override
     public String toString() {
       return "User{id=" + userId + ", email='" + email + "', role='" + role + "'}";

@@ -1,15 +1,23 @@
 package com.ecom.dao;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import com.ecom.models.Product;
+import com.ecom.models.Order;
+import com.ecom.models.OrderItem;
 import com.ecom.utils.DatabaseUtils;
+import com.ecom.utils.QueryTimer;
+import com.ecom.exceptions.DaoException;
+import com.ecom.exceptions.InsufficientInventoryException;
+
 public class OrderDao {
     
   /**
    * Performs a transactional order placement. 1. Inserts Order 2. Inserts OrderItems 3. Updates
    * Product Stock Rolls back if any step fails (e.g., insufficient stock).
    */
-  public boolean placeOrder(int userId, Map<Product, Integer> cartItems) throws SQLException {
+  public boolean placeOrder(int userId, Map<Product, Integer> cartItems) throws DaoException, InsufficientInventoryException {
     Connection conn = null;
     PreparedStatement orderStmt = null;
     PreparedStatement itemStmt = null;
@@ -18,18 +26,18 @@ public class OrderDao {
 
     try {
       conn = DatabaseUtils.getConnection();
-      // 1. Start Transaction
+
       conn.setAutoCommit(false);
 
-      // Calculate Total
+
       double totalAmount = 0;
       for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
         totalAmount += entry.getKey().getPrice() * entry.getValue();
       }
 
-      // 2. Insert Order
+
       String insertOrderSQL =
-          "INSERT INTO orders (user_id, order_date, total_amount) VALUES (?, NOW(), ?)";
+          "INSERT INTO orders (user_id, total_amount) VALUES (?, ?)";
       orderStmt = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS);
       orderStmt.setInt(1, userId);
       orderStmt.setDouble(2, totalAmount);
@@ -49,7 +57,7 @@ public class OrderDao {
 
       // 3. Insert Items & Update Stock
       String insertItemSQL =
-          "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES (?,"
+          "INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?,"
               + " ?, ?, ?)";
       // This query ensures we don't sell more than we have
       String updateStockSQL =
@@ -77,7 +85,7 @@ public class OrderDao {
         int stockRows = stockStmt.executeUpdate();
 
         if (stockRows == 0) {
-          throw new SQLException("Insufficient stock for product: " + product.getName());
+          throw new InsufficientInventoryException(product.getProductId(), quantity, 0);
         }
       }
 
@@ -88,25 +96,123 @@ public class OrderDao {
       System.out.println("Transaction Committed Successfully. Order ID: " + orderId);
       return true;
 
-    } catch (SQLException e) {
+    } catch (InsufficientInventoryException e) {
+        e.getMessage();
       if (conn != null) {
         try {
+          System.err.println("Transaction failed due to insufficient inventory. Rolling back.");
+          conn.rollback();
+        } catch (SQLException ex) {
+          ex.printStackTrace();
+        }
+      }
+      throw e;
+    } catch (SQLException e) {
+        e.getMessage();
+      if (conn != null) {
+        try {
+            e.getMessage();
+            e.printStackTrace();
           System.err.println("Transaction failed. Rolling back.");
           conn.rollback();
         } catch (SQLException ex) {
           ex.printStackTrace();
         }
       }
-      throw e; // Re-throw to notify caller
-    } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
+      throw new DaoException("Database error while placing order", e);
     } finally {
       // 5. Reset AutoCommit and Close Resources
-      if (conn != null) conn.setAutoCommit(true);
-      if (generatedKeys != null) generatedKeys.close();
-      if (orderStmt != null) orderStmt.close();
-      if (itemStmt != null) itemStmt.close();
-      if (stockStmt != null) stockStmt.close();
+      try {
+        if (conn != null) conn.setAutoCommit(true);
+        if (generatedKeys != null) generatedKeys.close();
+        if (orderStmt != null) orderStmt.close();
+        if (itemStmt != null) itemStmt.close();
+        if (stockStmt != null) stockStmt.close();
+      } catch (SQLException e) {
+        throw new DaoException("Failed to clean up resources", e);
+      }
     }
+  }
+
+  public List<Order> findByUserId(int userId) throws SQLException {
+    return QueryTimer.measure("order_findByUserId", () -> {
+      List<Order> orders = new ArrayList<>();
+      String sql = "SELECT order_id, user_id, created_at,status, total_amount FROM orders WHERE user_id = ? ORDER BY created_at DESC";
+      try (Connection conn = DatabaseUtils.getConnection();
+          PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, userId);
+        try (ResultSet rs = stmt.executeQuery()) {
+          while (rs.next()) {
+            orders.add(mapResultSetToOrder(rs));
+          }
+        }
+      }
+        return orders;
+    });
+  }
+
+  public Order findById(int orderId) throws SQLException {
+    String sql = "SELECT order_id, user_id,status, created_at, total_amount FROM orders WHERE order_id = ?";
+    try (Connection conn = DatabaseUtils.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+      stmt.setInt(1, orderId);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+          return mapResultSetToOrder(rs);
+        }
+      }
+    }
+      return null;
+  }
+
+  public List<Order> findAll() throws SQLException {
+    return QueryTimer.measure("order_findAll", () -> {
+      List<Order> orders = new ArrayList<>();
+      String sql = "SELECT order_id, user_id,status, created_at, total_amount FROM orders ORDER BY created_at DESC";
+      try (Connection conn = DatabaseUtils.getConnection();
+          Statement stmt = conn.createStatement();
+          ResultSet rs = stmt.executeQuery(sql)) {
+        while (rs.next()) {
+          orders.add(mapResultSetToOrder(rs));
+        }
+      }
+        return orders;
+    });
+  }
+
+  public List<OrderItem> findOrderItemsByOrderId(int orderId) throws SQLException {
+    List<OrderItem> items = new ArrayList<>();
+    String sql = "SELECT id, order_id, product_id,quantity, price_at_purchase FROM order_items WHERE order_id = ?";
+    try (Connection conn = DatabaseUtils.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+      stmt.setInt(1, orderId);
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          items.add(mapResultSetToOrderItem(rs));
+        }
+      }
+    }
+      return items;
+  }
+
+  private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+    Order order = new Order();
+    order.setOrderId(rs.getInt("order_id"));
+    order.setUserId(rs.getInt("user_id"));
+    order.setOrderDate(rs.getTimestamp("created_at").toLocalDateTime());
+    order.setTotalAmount(rs.getDouble("total_amount"));
+    order.setStatus(rs.getString("status"));
+    return order;
+  }
+
+  private OrderItem mapResultSetToOrderItem(ResultSet rs) throws SQLException {
+    OrderItem item = new OrderItem(
+        rs.getInt("product_id"),
+        rs.getInt("quantity"),
+        rs.getDouble("unit_price")
+    );
+    item.setId(rs.getInt("id"));
+    item.setOrderId(rs.getInt("order_id"));
+    return item;
   }
 }

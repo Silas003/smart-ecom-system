@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ecom.controllers.MyOrdersController" style="-fx-background-color: #f5f5f5;">
+
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 20; -fx-background-color: white;">
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;"/>
+            <Label text="My Orders" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="10" style="-fx-padding: 20;">
+            <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8;">
+                <columns>
+                    <TableColumn fx:id="orderIdColumn" text="Order ID" prefWidth="120"/>
+                    <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+                    <TableColumn fx:id="totalColumn" text="Total" prefWidth="100"/>
+                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="150"/>
+                </columns>
+            </TableView>
+
+            <TextArea fx:id="orderDetailsArea" editable="false" prefHeight="200"/>
+        </VBox>
+    </center>
+</BorderPane>
