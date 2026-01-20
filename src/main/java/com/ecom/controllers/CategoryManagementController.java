@@ -18,8 +18,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Controller for category management UI.
- * Provides full CRUD operations for categories with validation and feedback.
+ * Controller for managing product categories (admin): create, edit, delete categories.
  */
 public class CategoryManagementController {
 
@@ -36,7 +35,6 @@ public class CategoryManagementController {
     public void initialize() {
         categoryService = CategoryService.getInstance();
         
-        // Setup table columns
         idColumn.setCellValueFactory(new PropertyValueFactory<>("categoryId"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         
@@ -184,7 +182,6 @@ public class CategoryManagementController {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Enable/Disable save button based on input
         javafx.scene.Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
         saveButton.setDisable(true);
 

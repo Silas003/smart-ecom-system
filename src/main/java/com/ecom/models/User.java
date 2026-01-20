@@ -1,6 +1,9 @@
 package com.ecom.models;
 
-
+/**
+ * Domain model representing an application user.
+ * Contains authentication and contact information.
+ */
 public class User {
     private int userId;
     private String username;

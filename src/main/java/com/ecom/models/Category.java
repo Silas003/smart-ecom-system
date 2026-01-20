@@ -1,5 +1,8 @@
 package com.ecom.models;
 
+/**
+ * Category model representing a product category.
+ */
 public class Category {
   private int categoryId;
   private String name;

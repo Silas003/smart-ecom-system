@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
+/**
+ * Controller for the shopping cart screen; displays cart items and allows checkout navigation.
+ */
 public class CartController {
 
     @FXML private VBox cartItemsContainer;
@@ -50,7 +53,7 @@ public class CartController {
         }
         try {
 
-            SessionService session = com.ecom.services.SessionService.getInstance();
+            SessionService session = SessionService.getInstance();
             if (!session.isLoggedIn()) {
                 System.out.println("CartController: user not logged in, setting pendingFxml=checkout and navigating to login");
                 session.setPendingFxml("checkout");
@@ -62,7 +65,6 @@ public class CartController {
 
             NavigationUtils.navigate("checkout");
         } catch (IOException e) {
-            e.printStackTrace();
              showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
         }
     }

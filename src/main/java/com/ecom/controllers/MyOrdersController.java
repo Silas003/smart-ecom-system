@@ -17,6 +17,9 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Controller for viewing a customer's own orders and order details.
+ */
 public class MyOrdersController {
 
     @FXML private TableView<Order> ordersTable;

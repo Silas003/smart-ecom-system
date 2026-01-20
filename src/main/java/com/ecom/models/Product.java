@@ -1,6 +1,10 @@
 package com.ecom.models;
 
 
+/**
+ * Domain model representing a product in the catalog.
+ * Contains basic product attributes used by DAOs and UI.
+ */
 public class Product {
     private int productId;
     private int categoryId;

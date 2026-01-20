@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Utility class that manages a HikariCP connection pool and provides JDBC connections.
+ * Tests may override DB connection properties via system properties.
+ */
 public class DatabaseUtils {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseUtils.class);
     private static HikariDataSource ds;

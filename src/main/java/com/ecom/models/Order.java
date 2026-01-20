@@ -3,6 +3,10 @@ package com.ecom.models;
 
 import java.time.LocalDateTime;
 
+/**
+ * Domain model representing an order placed by a user.
+ * Stores metadata such as order date, total amount and status.
+ */
 public class Order {
   private int orderId;
   private int userId;

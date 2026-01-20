@@ -12,7 +12,9 @@ import javafx.event.ActionEvent;
 import java.io.IOException;
 import com.ecom.exceptions.*;
 
-
+/**
+ * Controller for the login screen. Handles user authentication and navigation after login.
+ */
 public class LoginController {
 
     @FXML

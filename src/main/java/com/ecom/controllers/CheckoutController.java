@@ -19,6 +19,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Controller for the Checkout screen.
+ * Handles building the order summary, validating input and invoking {@code OrderService}
+ * to persist the user's order.
+ */
 public class CheckoutController {
 
     @FXML private TextField cityField;
@@ -57,6 +62,9 @@ public class CheckoutController {
         updateOrderSummary();
     }
 
+    /**
+     * Handle Place Order button: validates input fields and performs checkout via OrderService.
+     */
     @FXML
     private void handlePlaceOrder() {
         if (

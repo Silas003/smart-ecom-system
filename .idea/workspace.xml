@@ -5,23 +5,55 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bf09acb-e35a-4e31-933e-e7e3b3b87062" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/db/migration/V5__create_order_address.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/AccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/AccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/AdminDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/AdminDashboardController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/CartController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/CategoryManagementController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/CategoryManagementController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/CheckoutController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/CheckoutController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/DashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/LoginController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/MyOrdersController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/MyOrdersController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/OrderManagementController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/OrderManagementController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/CategoryDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/CategoryDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/ProductController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/ProductManagementController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/ProductManagementController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/SignUpController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/SignUpController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/UserManagementController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/controllers/UserManagementController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/InventoryDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/InventoryDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/OrderDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/OrderDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/ProductDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/ProductDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/ReviewsDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/ReviewsDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/dao/UsersDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/dao/UsersDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/models/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/models/Category.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/models/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/models/Order.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/models/OrderItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/models/OrderItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/models/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/models/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/models/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/models/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/CartService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/CategoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/CategoryService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/InventoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/InventoryService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/OrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/PerformanceReportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/PerformanceReportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/ProductService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/SessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/SessionService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/services/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/utils/ValidationUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/utils/ValidationUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/fxml/adminDashboard.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/fxml/adminDashboard.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/fxml/checkout.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/fxml/checkout.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/fxml/ordermanagement.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/fxml/ordermanagement.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/fxml/product.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/fxml/product.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/sql/schema_postgres.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/sql/schema_postgres.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/utils/DatabaseUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/utils/DatabaseUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ecom/utils/QueryTimer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/ecom/utils/QueryTimer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/sql/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/sql/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/CartServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/CartServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/CategoryServiceNegativeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/CategoryServiceNegativeTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/CategoryServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/CategoryServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/InventoryServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/InventoryServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/OrderServiceNegativeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/OrderServiceNegativeTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/OrderServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/OrderServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/PerformanceReportServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/PerformanceReportServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/ProductServiceNegativeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/ProductServiceNegativeTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/SessionServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/SessionServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ecom/services/UserServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/ecom/services/UserServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/resources/test-schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/test-schema.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,23 +103,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.CustomerService.executor&quot;: &quot;Run&quot;,
-    &quot;Application.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/ref&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/SilasKumi/Documents/Projects/smart ecom system&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propCompiler&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.CustomerService.executor": "Run",
+    "Application.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "feature/testing",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/SilasKumi/Documents/Projects/smart ecom system",
+    "settings.editor.selected.configurable": "project.propCompiler",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\SilasKumi\Documents\Projects\smart ecom system\src\main\resources" />

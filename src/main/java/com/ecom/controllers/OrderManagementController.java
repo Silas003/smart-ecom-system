@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller that allows administrators to view and manage orders.
+ * Supports filtering by status, viewing order details in a modal, and updating order status.
+ */
 public class OrderManagementController {
 
     @FXML private TableView<Order> ordersTable;

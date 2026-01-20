@@ -8,6 +8,9 @@ import com.ecom.utils.PasswordUtils;
 import com.ecom.utils.ValidationUtils;
 import com.ecom.exceptions.*;
 
+/**
+ * Service class providing user authentication, signup and CRUD helpers.
+ */
 public class UserService {
     // Note: These fields are kept for potential future use with instance-based operations
     @SuppressWarnings("unused")

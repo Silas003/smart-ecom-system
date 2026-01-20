@@ -3,7 +3,7 @@ package com.ecom.services;
 import com.ecom.models.User;
 
 /**
- * Singleton service to manage user session
+ * Singleton service managing the current user session and pending navigation state.
  */
 public class SessionService {
     private static SessionService instance;

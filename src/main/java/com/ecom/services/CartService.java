@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Singleton service to manage cart across the application
+ * Singleton service for managing the user's shopping cart in-memory.
  */
 public class CartService {
     private static CartService instance;
@@ -58,5 +58,3 @@ public class CartService {
         return cart.isEmpty();
     }
 }
-
-

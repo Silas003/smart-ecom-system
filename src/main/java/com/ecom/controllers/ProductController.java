@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller used to display a single product details and allow adding to cart.
+ */
 public class ProductController {
 
     @FXML private TextField searchField;

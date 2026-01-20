@@ -24,6 +24,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
 
+/**
+ * Main customer dashboard controller: product browsing, cart management and quick checkout.
+ */
 public class DashboardController {
 
     @FXML private TextField searchField;

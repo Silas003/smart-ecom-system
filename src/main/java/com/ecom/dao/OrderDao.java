@@ -11,11 +11,24 @@ import com.ecom.utils.QueryTimer;
 import com.ecom.exceptions.DaoException;
 import com.ecom.exceptions.InsufficientInventoryException;
 
+/**
+ * Data Access Object (DAO) for orders and related entities.
+ * <p>
+ * Provides methods to create orders, read orders and order items, and update order status.
+ * Critical write operations are performed transactionally to ensure consistency between
+ * orders, order items and inventory updates.
+ */
 public class OrderDao {
     
   /**
    * Performs a transactional order placement. 1. Inserts Order 2. Inserts OrderItems 3. Updates
    * Product Stock Rolls back if any step fails (e.g., insufficient stock).
+   *
+   * @param userId    the ID of the purchasing user
+   * @param cartItems map of Product -> quantity
+   * @return true if the order was placed successfully
+   * @throws DaoException when a database error occurs
+   * @throws InsufficientInventoryException when inventory is insufficient for any item
    */
   public boolean placeOrder(int userId, Map<Product, Integer> cartItems) throws DaoException, InsufficientInventoryException {
     Connection conn = null;
@@ -150,6 +163,19 @@ public class OrderDao {
   }
 
   // New overloaded placeOrder to accept shipping address and insert into order_address table within the same transaction
+  /**
+   * Place an order and persist a shipping address for the order within the same transaction.
+   *
+   * @param userId    the ID of the purchasing user
+   * @param cartItems map of Product -> quantity
+   * @param city      shipping city
+   * @param region    shipping region/state
+   * @param zipCode   shipping postal code
+   * @param address   shipping address line
+   * @return true if the order and address were persisted successfully
+   * @throws DaoException when a database error occurs
+   * @throws InsufficientInventoryException when inventory is insufficient for any item
+   */
   public boolean placeOrder(int userId, Map<Product, Integer> cartItems, String city, String region, String zipCode,String address) throws DaoException, InsufficientInventoryException {
     Connection conn = null;
     PreparedStatement orderStmt = null;

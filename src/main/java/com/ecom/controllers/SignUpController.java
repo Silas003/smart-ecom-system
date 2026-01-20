@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
 import com.ecom.exceptions.*;
 
 
+/**
+ * Controller for user registration (signup) and profile creation/editing.
+ */
 public class SignUpController {
     @FXML
     private TextField usernameField;
