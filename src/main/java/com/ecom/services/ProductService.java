@@ -90,10 +90,16 @@ public class ProductService {
         if (product.getPrice() < 0) throw new ValidationException("Price must be zero or positive", "price", product.getPrice());
         if (product.getStockQuantity() < 0) throw new ValidationException("Stock quantity must be non-negative", "stockQuantity", product.getStockQuantity());
         try {
+            Product existing = productDAO.findByName(name);
+            if (existing != null) {
+                throw new com.ecom.exceptions.DuplicateEntityException("Product with name '" + name + "' already exists");
+            }
             productDAO.create(product);
             invalidateAll();
+        } catch (com.ecom.exceptions.DuplicateEntityException de) {
+            throw de;
         } catch (SQLException e) {
-            throw new DaoException("Failed to create product", e);
+            throw new DaoException("Failed to create product: " + e.getMessage(), e);
         }
     }
 
@@ -103,11 +109,18 @@ public class ProductService {
         if (product.getPrice() < 0) throw new ValidationException("Price must be zero or positive", "price", product.getPrice());
         if (product.getStockQuantity() < 0) throw new ValidationException("Stock quantity must be non-negative", "stockQuantity", product.getStockQuantity());
         try {
+            // check duplicate name excluding self
+            Product existing = productDAO.findByName(product.getName());
+            if (existing != null && existing.getProductId() != product.getProductId()) {
+                throw new com.ecom.exceptions.DuplicateEntityException("Another product with name '" + product.getName() + "' already exists");
+            }
             productDAO.update(product);
             productCache.put(product.getProductId(), product);
             invalidateAll();
+        } catch (com.ecom.exceptions.DuplicateEntityException de) {
+            throw de;
         } catch (SQLException e) {
-            throw new DaoException("Failed to update product", e);
+            throw new DaoException("Failed to update product: " + e.getMessage(), e);
         }
     }
 

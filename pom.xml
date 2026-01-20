@@ -73,6 +73,7 @@
             <artifactId>bson</artifactId>
             <version>4.11.1</version>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -93,6 +94,7 @@
                     <mainClass>com.ecom.Main</mainClass>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
