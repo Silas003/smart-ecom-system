@@ -26,11 +26,11 @@ public class DatabaseUtils {
         }
         String user = System.getProperty("DB_USERNAME");
         if (user == null) {
-            user = System.getenv().getOrDefault("DB_USERNAME", "postgres");
+            user = System.getenv("DB_USERNAME");
         }
         String pass = System.getProperty("DB_PASSWORD");
         if (pass == null) {
-            pass = System.getenv().getOrDefault("DB_PASSWORD", "Drake@7890");
+            pass = System.getenv("DB_PASSWORD");
         }
 
         config.setJdbcUrl(url);
