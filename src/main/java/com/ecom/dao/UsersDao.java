@@ -1,5 +1,6 @@
 package com.ecom.dao;
 
+import com.ecom.exceptions.DuplicateEntityException;
 import com.ecom.utils.DatabaseUtils;
 import com.ecom.models.User;
 import com.ecom.exceptions.DaoException;
@@ -12,6 +13,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO for users: create, read, update and delete operations and email checks.
+ */
 public class UsersDao {
     public static void createUser(User user) throws DaoException{
         if(user == null) throw new DaoException("User is null");
@@ -69,7 +73,7 @@ public class UsersDao {
 
     }
     
-    public static boolean emailExists(String email) throws DaoException{
+    public static boolean emailExists(String email) throws DuplicateEntityException {
         if (email == null || email.isBlank()) return false;
         String sql = "select count(*) from users where email=?";
         try(Connection conn = DatabaseUtils.getConnection()){
@@ -81,7 +85,7 @@ public class UsersDao {
             }
             return false;
         } catch (SQLException e) {
-            throw new DaoException("Failed to check email existence", e);
+            throw new DuplicateEntityException(e.getMessage());
         }
     }
 

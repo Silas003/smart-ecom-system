@@ -1,5 +1,7 @@
 package com.ecom.dao;
 
+import org.junit.jupiter.api.BeforeAll;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,8 +10,9 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 public class TestDb {
+    @BeforeAll
     public static void setupDb() throws Exception {
-        // Configure H2 in-memory DB for tests
+        // Configure H2 in-memory DB
         System.setProperty("DB_URL", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         System.setProperty("DB_USERNAME", "sa");
         System.setProperty("DB_PASSWORD", "");
@@ -19,13 +22,12 @@ public class TestDb {
             InputStream in = TestDb.class.getResourceAsStream("/sql/schema.sql");
             if (in == null) throw new RuntimeException("schema.sql not found in test resources");
             try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-                StringBuilder sb = new StringBuilder();
                 String line;
+                StringBuilder sb = new StringBuilder();
                 while ((line = br.readLine()) != null) {
-                    sb.append(line).append('\n');
+                    sb.append(line).append("\n");
                 }
-                // Split on semicolon followed by newline to separate statements
-                String[] statements = sb.toString().split(";\s*\n");
+                String[] statements = sb.toString().split(";\n");
                 try (Statement stmt = conn.createStatement()) {
                     for (String s : statements) {
                         String sql = s.trim();

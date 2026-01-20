@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Utility class for measuring and tracking query execution times.
- * Provides functionality to record query performance metrics for optimization analysis.
+ * Simple utility to measure and record execution times for database queries and other operations.
+ * Used by the PerformanceReportService to compare baseline and optimized timings.
  */
 public class QueryTimer {
     private static final Logger logger = LoggerFactory.getLogger(QueryTimer.class);

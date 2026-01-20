@@ -8,6 +8,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service layer for inventory operations such as restocking low inventory.
+ */
 public class InventoryService {
     private final InventoryDao inventoryDao;
     private final ProductDao productDao;
@@ -41,4 +44,3 @@ public class InventoryService {
         return restocked;
     }
 }
-

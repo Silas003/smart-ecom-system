@@ -8,15 +8,30 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Utility class that manages a HikariCP connection pool and provides JDBC connections.
+ * Tests may override DB connection properties via system properties.
+ */
 public class DatabaseUtils {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseUtils.class);
-    private static final HikariDataSource ds;
+    private static HikariDataSource ds;
 
-    static {
+    private static synchronized void ensureInitialized() {
+        if (ds != null) return;
         HikariConfig config = new HikariConfig();
-        String url = System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://localhost:5432/smartEcom");
-        String user = System.getenv().getOrDefault("DB_USERNAME", "postgres");
-        String pass = System.getenv().getOrDefault("DB_PASSWORD", "Drake@7890");
+        // Prefer system properties (so tests can set -DDB_URL=...), fall back to environment variables
+        String url = System.getProperty("DB_URL");
+        if (url == null) {
+            url = System.getenv().getOrDefault("DB_URL", "jdbc:postgresql://localhost:5432/smartEcom");
+        }
+        String user = System.getProperty("DB_USERNAME");
+        if (user == null) {
+            user = System.getenv().getOrDefault("DB_USERNAME", "postgres");
+        }
+        String pass = System.getProperty("DB_PASSWORD");
+        if (pass == null) {
+            pass = System.getenv().getOrDefault("DB_PASSWORD", "Drake@7890");
+        }
 
         config.setJdbcUrl(url);
         config.setUsername(user);
@@ -33,6 +48,7 @@ public class DatabaseUtils {
     }
 
     public static Connection getConnection() throws SQLException {
+        ensureInitialized();
         return ds.getConnection();
     }
 

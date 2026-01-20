@@ -61,6 +61,13 @@
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.9</version>
         </dependency>
+        <!-- Ensure slf4j-api matches the provider to avoid AbstractMethodError in tests -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+
         <!-- MongoDB Driver for NoSQL -->
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -72,6 +79,15 @@
             <groupId>org.mongodb</groupId>
             <artifactId>bson</artifactId>
             <version>4.11.1</version>
+        </dependency>
+
+        <!-- H2 in-memory database for tests -->
+        <!-- Source: https://mvnrepository.com/artifact/com.h2database/h2 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.4.240</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -92,6 +108,21 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.ecom.Main</mainClass>
+                </configuration>
+            </plugin>
+
+            <!-- Configure Surefire to disable writing XML reports and keep output on the console -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <!-- Do not write XML/HTML reports to target/surefire-reports -->
+                    <disableXmlReport>true</disableXmlReport>
+                    <!-- Ensure test stdout/stderr is not redirected to files (print to console) -->
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <!-- Print a concise summary to console -->
+                    <printSummary>true</printSummary>
                 </configuration>
             </plugin>
 

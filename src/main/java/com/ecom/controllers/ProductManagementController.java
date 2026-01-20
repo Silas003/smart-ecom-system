@@ -4,7 +4,6 @@ import com.ecom.models.Product;
 import com.ecom.models.Category;
 import com.ecom.services.ProductService;
 import com.ecom.dao.CategoryDao;
-import com.ecom.exceptions.DuplicateEntityException;
 import com.ecom.exceptions.ValidationException;
 import com.ecom.exceptions.DaoException;
 import javafx.fxml.FXML;
@@ -20,6 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for admin product management: list, search, create, edit, and delete products.
+ */
 public class ProductManagementController {
 
     @FXML private TableView<Product> productsTable;

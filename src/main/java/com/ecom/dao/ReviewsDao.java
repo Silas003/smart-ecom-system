@@ -9,6 +9,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO for storing and retrieving product reviews in the relational database.
+ */
 public class ReviewsDao {
 
     public static void create(int userId, int productId, String description, int stars) throws SQLException {

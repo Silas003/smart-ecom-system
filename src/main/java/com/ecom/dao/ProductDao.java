@@ -6,6 +6,9 @@ import com.ecom.models.Product;
 import com.ecom.utils.DatabaseUtils;
 import com.ecom.utils.QueryTimer;
 
+/**
+ * DAO for product persistence operations: search, CRUD and counting.
+ */
 public class ProductDao {
 
   public void create(Product product) throws SQLException {

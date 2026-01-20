@@ -16,6 +16,9 @@ import javafx.scene.layout.GridPane;
 
 import java.util.List;
 
+/**
+ * Admin controller for managing users: list, edit, and delete user accounts.
+ */
 public class UserManagementController {
 
     // Suppress warnings for unused fields and methods that are linked to FXML

@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
- * Service for generating performance reports comparing query execution times
- * before and after optimization (indexing, caching).
+ * Service that generates performance reports by comparing query timing metrics
+ * captured via {@code QueryTimer} before and after optimizations.
  */
 public class PerformanceReportService {
     private static final Logger logger = LoggerFactory.getLogger(PerformanceReportService.class);

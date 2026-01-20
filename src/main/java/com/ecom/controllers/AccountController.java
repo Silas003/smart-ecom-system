@@ -9,6 +9,9 @@ import javafx.scene.control.Alert;
 
 import java.io.IOException;
 
+/**
+ * Controller for user account screen: displays and updates user profile information.
+ */
 public class AccountController {
 
     @FXML private Label usernameLabel;
@@ -68,4 +71,3 @@ public class AccountController {
         alert.showAndWait();
     }
 }
-

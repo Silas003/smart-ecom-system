@@ -1,5 +1,8 @@
 package com.ecom.models;
 
+/**
+ * Order item representing a single product line in an order.
+ */
 public class OrderItem {
     private int id;
     private int orderId;

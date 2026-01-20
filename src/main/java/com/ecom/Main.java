@@ -8,11 +8,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Main application entry point for the Smart E-Commerce System.
+ * Initializes and launches the JavaFX application.
+ */
 public class Main extends Application{
     @Override
     public void start(Stage primaryStage){
         NavigationUtils.setStage(primaryStage);
-
         try {
             NavigationUtils.navigate("login");
         } catch (IOException e) {

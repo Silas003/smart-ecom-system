@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * DAO that manages inventory (stock) operations.
  * Inventory DAO that operates on inventory.quantity_in_stock as the source of truth.
  */
 public class InventoryDao {

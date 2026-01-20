@@ -3,6 +3,7 @@ package com.ecom.controllers;
 import com.ecom.dao.OrderDao;
 import com.ecom.models.Order;
 import com.ecom.models.User;
+import com.ecom.services.ProductService;
 import com.ecom.utils.NavigationUtils;
 import com.ecom.utils.QueryTimer;
 import com.ecom.services.UserService;
@@ -10,6 +11,8 @@ import com.ecom.services.PerformanceReportService;
 import com.ecom.exceptions.DaoException;
 import com.ecom.exceptions.InvalidInputException;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
@@ -31,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Admin dashboard controller: shows sales metrics, cache/performance summaries and navigation to admin panels.
+ */
 public class AdminDashboardController {
 
     @FXML private Label totalSalesLabel;
@@ -44,7 +50,7 @@ public class AdminDashboardController {
     @FXML private Label avgQueryTimeLabel;
 
     private final OrderDao orderDao = new OrderDao();
-    private final com.ecom.services.ProductService productService = com.ecom.services.ProductService.getInstance();
+    private final com.ecom.services.ProductService productService = ProductService.getInstance();
     private final PerformanceReportService performanceReportService = PerformanceReportService.getInstance();
 
     @FXML
@@ -59,7 +65,7 @@ public class AdminDashboardController {
         recentOrdersTable.getColumns().clear();
         TableColumn<Order, Integer> idCol = new TableColumn<>("Order ID");
         idCol.setPrefWidth(100);
-        idCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleIntegerProperty(cell.getValue().getOrderId()).asObject());
+        idCol.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getOrderId()).asObject());
 
         TableColumn<Order, String> customerCol = new TableColumn<>("Customer");
         customerCol.setPrefWidth(200);
@@ -67,20 +73,20 @@ public class AdminDashboardController {
             try {
                 User u = UserService.getUserById(cell.getValue().getUserId());
                 String name = (u != null) ? u.getUsername() : "User #" + cell.getValue().getUserId();
-                return new javafx.beans.property.SimpleStringProperty(name);
+                return new SimpleStringProperty(name);
             } catch (DaoException | InvalidInputException e) {
-                return new javafx.beans.property.SimpleStringProperty("User #" + cell.getValue().getUserId());
+                return new SimpleStringProperty("User #" + cell.getValue().getUserId());
             }
         });
 
         TableColumn<Order, String> dateCol = new TableColumn<>("Date");
         dateCol.setPrefWidth(150);
-        dateCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
+        dateCol.setCellValueFactory(cell -> new SimpleStringProperty(
                 cell.getValue().getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
 
         TableColumn<Order, String> totalCol = new TableColumn<>("Total");
         totalCol.setPrefWidth(100);
-        totalCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
+        totalCol.setCellValueFactory(cell -> new SimpleStringProperty(
                 String.format("$%.2f", cell.getValue().getTotalAmount())));
 
         recentOrdersTable.getColumns().addAll(idCol, customerCol, dateCol, totalCol);
@@ -306,10 +312,9 @@ public class AdminDashboardController {
     @FXML
     private void handleBack() {
         try {
-            if (com.ecom.utils.NavigationUtils.canGoBack()) {
-                com.ecom.utils.NavigationUtils.goBack();
+            if (NavigationUtils.canGoBack()) {
+                NavigationUtils.goBack();
             } else {
-                // nothing to do
             }
         } catch (Exception e) {
             e.printStackTrace();

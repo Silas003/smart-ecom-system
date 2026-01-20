@@ -12,6 +12,12 @@ import com.ecom.utils.ValidationUtils;
 import com.ecom.exceptions.DaoException;
 import com.ecom.exceptions.ValidationException;
 
+/**
+ * Service layer for product-related operations, caching and search utilities.
+ *
+ * Provides caching of product entities, search and sorting helpers, and validates input
+ * before delegating persistence to {@code ProductDao}.
+ */
 public class ProductService {
     private final ProductDao productDAO;
     private final Map<Integer, Product> productCache;
@@ -76,6 +82,12 @@ public class ProductService {
         return productDAO.count(q, categoryId);
     }
 
+    /**
+     * Get product by id (uses in-memory cache if available).
+     *
+     * @param id product id
+     * @return Product or null if not found
+     */
     public Product getProductById(int id) throws SQLException {
         if (productCache.containsKey(id)) return productCache.get(id);
         Product p = productDAO.findById(id);

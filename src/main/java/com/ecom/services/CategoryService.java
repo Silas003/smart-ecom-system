@@ -11,8 +11,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Service layer for category management.
- * Provides validation, error handling, and business logic for category operations.
+ * Service layer for category management; validates input and delegates to {@code CategoryDao}.
  */
 public class CategoryService {
     private final CategoryDao categoryDAO;
