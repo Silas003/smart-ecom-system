@@ -34,21 +34,20 @@ public class UserService {
         try {
             User user = UsersDao.getUserByEmail(email.toLowerCase());
             if(user == null){
-                throw new AuthenticationException("Incorrect username or password");
+                throw new AuthenticationException("Invalid credentials provided");
             }
             String hashedPassword = user.getPassword();
             if(hashedPassword == null || hashedPassword.isEmpty()){
-                throw new AuthenticationException("Incorrect username or password");
+                throw new AuthenticationException("Invalid email credentials");
             }
             if(PasswordUtils.verifyPassword(password, hashedPassword)){
-                return user; // Return user object on successful login
+                return user;
+            }else{
+                throw new AuthenticationException("Invalid credential credentials");
             }
-            throw new AuthenticationException("Incorrect username or password");
+
         } catch (DaoException e) {
             throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new DaoException("Unexpected error during login", e);
         }
     }
 

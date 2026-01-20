@@ -8,7 +8,8 @@
 
     <top>
         <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 20; -fx-background-color: white;">
-            <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;"/>
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: #000000; -fx-text-fill: white; -fx-font-weight: bold;
+                                  -fx-background-radius: 5; -fx-cursor: hand; -fx-font-size: 16px;"/>
             <Label text="My Account" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
         </HBox>
     </top>

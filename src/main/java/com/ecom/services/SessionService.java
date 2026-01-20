@@ -8,6 +8,7 @@ import com.ecom.models.User;
 public class SessionService {
     private static SessionService instance;
     private User currentUser;
+    private String pendingFxml; // new: store desired navigation after login
 
     private SessionService() {
         this.currentUser = null;
@@ -39,6 +40,17 @@ public class SessionService {
     public void logout() {
         this.currentUser = null;
     }
+
+    // Pending navigation helpers
+    public void setPendingFxml(String fxml) {
+        this.pendingFxml = fxml;
+    }
+
+    public String getPendingFxml() {
+        return this.pendingFxml;
+    }
+
+    public void clearPendingFxml() {
+        this.pendingFxml = null;
+    }
 }
-
-

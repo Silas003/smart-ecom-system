@@ -14,11 +14,21 @@ CREATE TABLE categories (
 );
 
 CREATE TABLE products (
-  product_id INT AUTO_INCREMENT PRIMARY KEY,
+  id INT AUTO_INCREMENT PRIMARY KEY,
   category_id INT,
   name VARCHAR(255),
   price DOUBLE,
   stock_quantity INT
+);
+
+-- Inventory table: source of truth for stock levels
+CREATE TABLE inventory (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT NOT NULL UNIQUE,
+  quantity_in_stock INT NOT NULL DEFAULT 0,
+  quantity_reserved INT NOT NULL DEFAULT 0,
+  stock_status VARCHAR(32),
+  last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE orders (

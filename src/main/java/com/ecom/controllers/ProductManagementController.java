@@ -4,15 +4,16 @@ import com.ecom.models.Product;
 import com.ecom.models.Category;
 import com.ecom.services.ProductService;
 import com.ecom.dao.CategoryDao;
+import com.ecom.exceptions.DuplicateEntityException;
+import com.ecom.exceptions.ValidationException;
+import com.ecom.exceptions.DaoException;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.concurrent.Task;
-import javafx.application.Platform;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -30,9 +31,9 @@ public class ProductManagementController {
     @FXML private TextField searchField;
     @FXML private ProgressIndicator progress;
 
-    private ObservableList<Product> productList = FXCollections.observableArrayList();
+    private final ObservableList<Product> productList = FXCollections.observableArrayList();
     private ProductService productService;
-    private Map<Integer, String> categoryMap = new HashMap<>();
+    private final Map<Integer, String> categoryMap = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -229,30 +230,24 @@ public class ProductManagementController {
         javafx.scene.Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
         saveButton.setDisable(true);
 
-        nameField.textProperty().addListener((observable, oldValue, newValue) -> {
-            saveButton.setDisable(newValue.trim().isEmpty() || 
-                                 priceField.getText().trim().isEmpty() || 
-                                 stockField.getText().trim().isEmpty() ||
-                                 categoryCombo.getValue() == null);
-        });
-        priceField.textProperty().addListener((observable, oldValue, newValue) -> {
-            saveButton.setDisable(nameField.getText().trim().isEmpty() || 
-                                 newValue.trim().isEmpty() || 
-                                 stockField.getText().trim().isEmpty() ||
-                                 categoryCombo.getValue() == null);
-        });
-        stockField.textProperty().addListener((observable, oldValue, newValue) -> {
-            saveButton.setDisable(nameField.getText().trim().isEmpty() || 
-                                 priceField.getText().trim().isEmpty() || 
-                                 newValue.trim().isEmpty() ||
-                                 categoryCombo.getValue() == null);
-        });
-        categoryCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
-            saveButton.setDisable(nameField.getText().trim().isEmpty() || 
-                                 priceField.getText().trim().isEmpty() || 
-                                 stockField.getText().trim().isEmpty() ||
-                                 newValue == null);
-        });
+        Runnable checkEnable = () -> {
+            boolean disable = nameField.getText().trim().isEmpty() || priceField.getText().trim().isEmpty() || stockField.getText().trim().isEmpty() || categoryCombo.getValue() == null;
+            // basic numeric format validation
+            try {
+                if (!disable) {
+                    Double.parseDouble(priceField.getText().trim());
+                    Integer.parseInt(stockField.getText().trim());
+                }
+            } catch (NumberFormatException nfe) {
+                disable = true;
+            }
+            saveButton.setDisable(disable);
+        };
+
+        nameField.textProperty().addListener((observable, oldValue, newValue) -> checkEnable.run());
+        priceField.textProperty().addListener((observable, oldValue, newValue) -> checkEnable.run());
+        stockField.textProperty().addListener((observable, oldValue, newValue) -> checkEnable.run());
+        categoryCombo.valueProperty().addListener((observable, oldValue, newValue) -> checkEnable.run());
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
@@ -283,13 +278,16 @@ public class ProductManagementController {
 
                             @Override
                             protected void succeeded() {
+                                progress.setVisible(false);
                                 loadProductsAsync();
-                                showAlert(Alert.AlertType.INFORMATION, "Success", "Product created.");
+                                showAlert(Alert.AlertType.INFORMATION, "Success", "Product created: " + name);
                             }
 
                             @Override
                             protected void failed() {
-                                showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+                                progress.setVisible(false);
+                                String message = userMessageFromThrowable(getException());
+                                showAlert(Alert.AlertType.ERROR, "Error creating product", message);
                             }
                         };
                         progress.setVisible(true);
@@ -307,13 +305,16 @@ public class ProductManagementController {
 
                             @Override
                             protected void succeeded() {
+                                progress.setVisible(false);
                                 loadProductsAsync();
-                                showAlert(Alert.AlertType.INFORMATION, "Success", "Product updated.");
+                                showAlert(Alert.AlertType.INFORMATION, "Success", "Product updated: " + name);
                             }
 
                             @Override
                             protected void failed() {
-                                showAlert(Alert.AlertType.ERROR, "Error", getException().getMessage());
+                                progress.setVisible(false);
+                                String message = userMessageFromThrowable(getException());
+                                showAlert(Alert.AlertType.ERROR, "Error updating product", message);
                             }
                         };
                         progress.setVisible(true);
@@ -330,9 +331,18 @@ public class ProductManagementController {
             return null;
         });
 
-        dialog.showAndWait().ifPresent(result -> {
-            // nothing further - background tasks will refresh
-        });
+        dialog.showAndWait();
+    }
+
+    private String userMessageFromThrowable(Throwable ex) {
+        Throwable t = ex;
+        while (t != null) {
+            if (t instanceof ValidationException || t instanceof DaoException) {
+                return t.getMessage();
+            }
+            t = t.getCause();
+        }
+        return ex != null && ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred.";
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

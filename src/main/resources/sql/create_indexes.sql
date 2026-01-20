@@ -16,6 +16,9 @@
 CREATE INDEX IF NOT EXISTS idx_products_name_lower 
 ON products (LOWER(name));
 
+-- Unique index on lower(name) to prevent duplicate product names (case-insensitive)
+CREATE UNIQUE INDEX IF NOT EXISTS ux_products_name_lower ON products (LOWER(name));
+
 -- Index on products.category_id for filtering products by category
 -- Improves JOIN and WHERE clause performance when filtering by category
 CREATE INDEX IF NOT EXISTS idx_products_category_id 

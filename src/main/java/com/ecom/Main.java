@@ -18,7 +18,7 @@ public class Main extends Application{
             e.printStackTrace();
         }
 
-        primaryStage.setTitle("ecom");
+        primaryStage.setTitle("Smart E-Commerce Application");
         primaryStage.show();
     }
 

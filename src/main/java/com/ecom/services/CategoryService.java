@@ -57,8 +57,12 @@ public class CategoryService {
         try {
             categoryDAO.create(category);
         } catch (SQLException e) {
-            // Check if it's a unique constraint violation
-            if (e.getMessage() != null && (e.getMessage().contains("unique") || 
+
+            if (e.getSQLState() != null && e.getSQLState().equals("23505")) { // Postgres unique violation
+                throw new DuplicateEntityException("Category with name '" + name + "' already exists");
+            }
+
+            if (e.getMessage() != null && (e.getMessage().contains("unique") ||
                 e.getMessage().contains("duplicate"))) {
                 throw new DuplicateEntityException("Category with name '" + name + "' already exists");
             }
