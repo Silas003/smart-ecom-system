@@ -11,11 +11,11 @@ public class Cart {
     public Cart(int id, int userId, String status, double amount, LocalDateTime createdAt) {
     }
 
-    public  Long getId() {
+    public  int getId() {
         return id;
     }
 
-    public  void setId(Long id) {
+    public  void setId(int id) {
         this.id = id;
     }
 
@@ -23,7 +23,7 @@ public class Cart {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
