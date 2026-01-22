@@ -153,20 +153,4 @@ public class CategoryService {
         }
     }
 
-    /**
-     * Gets a category by ID.
-     */
-    public Category getCategoryById(int categoryId) throws DaoException {
-        try {
-            Category category = categoryDAO.findById(categoryId);
-            if (category == null) {
-                throw new com.ecom.exceptions.EntityNotFoundException("Category", categoryId);
-            }
-            return category;
-        } catch (SQLException e) {
-            throw new DaoException("Failed to fetch category", e);
-        } catch (com.ecom.exceptions.EntityNotFoundException e) {
-            throw new DaoException(e.getMessage(), e);
-        }
-    }
 }

@@ -77,4 +77,5 @@ public class User {
     public String toString() {
       return "User{id=" + userId + ", email='" + email + "', role='" + role + "'}";
     }
-  }
+
+}

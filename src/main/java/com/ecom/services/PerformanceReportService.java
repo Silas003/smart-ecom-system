@@ -192,7 +192,4 @@ public class PerformanceReportService {
         );
     }
     
-    public boolean isBaselineCaptured() {
-        return baselineCaptured;
-    }
 }

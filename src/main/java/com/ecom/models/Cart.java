@@ -8,6 +8,11 @@ public class Cart {
     private String status;
     private Double amount;
 
+    public Cart( int userId) {
+        this.userId = userId;
+
+    }
+
     public Cart(int id, int userId, String status, double amount, LocalDateTime createdAt) {
     }
 
@@ -41,5 +46,8 @@ public class Cart {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public void setTotalPrice(double totalPrice) {
     }
 }

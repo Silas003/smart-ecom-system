@@ -94,7 +94,20 @@ public class CartDao {
             throw new RuntimeException(e);
         }
     }
-
+    public Cart getCartActiveByUserId(int userId) {
+        String sql = "SELECT * FROM carts where user_id = ? and status = 'ACTIVE'";
+        try(Connection connection = DatabaseUtils.getConnection()){
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                return mapResultSetToCart(resultSet);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
     public static Cart mapResultSetToCart(ResultSet rs) throws SQLException {
         return new Cart(
             rs.getInt("id"),
@@ -104,4 +117,6 @@ public class CartDao {
             rs.getTimestamp("created_at").toLocalDateTime()
         );
     }
+
+
 }

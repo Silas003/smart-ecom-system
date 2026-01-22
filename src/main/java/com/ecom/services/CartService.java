@@ -1,7 +1,12 @@
 package com.ecom.services;
 
+import com.ecom.dao.CartDao;
+import com.ecom.dao.CartItemDao;
+import com.ecom.models.Cart;
+import com.ecom.models.CartItem;
 import com.ecom.models.Product;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,9 +15,11 @@ import java.util.Map;
 public class CartService {
     private static CartService instance;
     private Map<Integer, Integer> cart; // productId -> quantity
-
+    private Map<Integer, List<CartItem>> cartItems;
+    private CartDao cartDao;
+    private CartItemDao cartItemDao;
+    private SessionService sessionService;
     private CartService() {
-        this.cart = new HashMap<>();
     }
 
     public static CartService getInstance() {
@@ -22,8 +29,28 @@ public class CartService {
         return instance;
     }
 
-    public void addToCart(int productId, int quantity) {
-        cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
+    public void addToCart(Product product, int quantity) {
+        cart.put(product.getProductId(), cart.getOrDefault(product.getProductId(), 0) + quantity);
+        Cart cart = cartDao.getCartActiveByUserId(sessionService.getCurrentUser().getUserId());
+        if (cart == null){
+            cart = new Cart(sessionService.getCurrentUser().getUserId());
+            cartDao.createCart(cart);
+
+        }
+        CartItem item = cartItemDao.findByCartIdAndProductId(cart.getId(), product.getProductId());
+        if(item != null){
+            item.setQuantity(item.getQuantity() + quantity);
+            item.setTotalPrice(item.getUnitPrice() * item.getQuantity());
+            cartItemDao.updateCartItemQuantity(item.getCartId(),item.getQuantity(),item.getTotalPrice());
+            return;
+        }
+        CartItem cartItem = new CartItem();
+        cartItem.setProductId(product.getProductId());
+        cartItem.setUnitPrice(product.getPrice());
+        cartItem.setTotalPrice(product.getPrice()*quantity);
+        cartItem.setQuantity(quantity);
+        cartItem.setCartId(cart.getId());
+        cartItemDao.createCartItem(cartItem);
     }
 
     public void removeFromCart(int productId) {

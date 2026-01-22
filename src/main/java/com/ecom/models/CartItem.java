@@ -2,68 +2,67 @@ package com.ecom.models;
 
 
 public class CartItem {
-    private Long id;
-    private Long userId;
-    private Long productId;
-    private Double unitPrice;
-    private Double totalPrice;
-    private Integer quantity;
+    private int id;
+    private int cartId;
+    private int productId;
+    private double unitPrice;
+    private double totalPrice;
+    private int quantity;
 
     public CartItem(){}
-    public CartItem(Long id, Long userId, Long productId, Double unitPrice, Double totalPrice, Integer quantity) {
-        this.id = id;
-        this.userId = userId;
+    public CartItem(int cartId, int productId, Double unitPrice, Double totalPrice, int quantity) {
+        this.cartId = cartId;
         this.productId = productId;
         this.unitPrice = unitPrice;
         this.totalPrice = totalPrice;
         this.quantity = quantity;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getProductId() {
+    public int getProductId() {
         return productId;
     }
 
-    public void setProductId(Long productId) {
+    public void setProductId( int productId) {
         this.productId = productId;
     }
 
-    public Double getUnitPrice() {
+    public double getUnitPrice() {
         return unitPrice;
     }
 
-    public void setUnitPrice(Double unitPrice) {
+    public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
     }
 
-    public Double getTotalPrice() {
+    public double getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(Double totalPrice) {
+    public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
     }
 
-    public Integer getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public int getCartId() {
+        return cartId;
+    }
+
+    public void setCartId(int cartId) {
+        this.cartId = cartId;
     }
 }

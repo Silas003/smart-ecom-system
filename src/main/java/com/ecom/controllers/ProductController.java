@@ -5,6 +5,7 @@ import com.ecom.models.Category;
 import com.ecom.services.ProductService;
 import com.ecom.services.CartService;
 import com.ecom.dao.CategoryDao;
+import com.ecom.services.SessionService;
 import com.ecom.utils.NavigationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -40,6 +41,7 @@ public class ProductController {
     private CartService cartService;
     private List<Product> allProducts;
     private Map<Integer, String> categoryMap = new HashMap<>();
+    private SessionService sessionService;
 
     private final int pageSize = 9;
 
@@ -48,7 +50,7 @@ public class ProductController {
         productService = ProductService.getInstance();
         categoryDao = new CategoryDao();
         cartService = CartService.getInstance();
-
+        sessionService  = SessionService.getInstance();
         loadCategories();
         initializeSortOptions();
         initializePagination();
@@ -139,7 +141,7 @@ public class ProductController {
     @FXML
     private void handleOrders() {
         // Navigate to user's orders; require login
-        com.ecom.services.SessionService session = com.ecom.services.SessionService.getInstance();
+        SessionService session = com.ecom.services.SessionService.getInstance();
         if (!session.isLoggedIn()) {
             try {
                 NavigationUtils.navigate("login");
@@ -168,7 +170,7 @@ public class ProductController {
             return;
         }
 
-        cartService.addToCart(product.getProductId(), 1);
+        cartService.addToCart(product, 1);
         updateCartCount();
         showAlert(Alert.AlertType.INFORMATION, "Added to Cart", product.getName() + " added to cart!");
     }
