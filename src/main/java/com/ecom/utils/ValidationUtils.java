@@ -38,6 +38,7 @@ public class ValidationUtils {
     }
 
     public static void requireNonEmpty(String email, String email1) throws  ValidationException{
+
     }
 
     public static void requireEmail(String email, String email1) throws ValidationException{
