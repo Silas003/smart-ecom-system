@@ -2,6 +2,8 @@ package com.ecom.dao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import com.ecom.models.Product;
 import com.ecom.utils.DatabaseUtils;
 import com.ecom.utils.QueryTimer;
@@ -11,11 +13,25 @@ import com.ecom.utils.QueryTimer;
  */
 public class ProductDao {
 
+  private static final Logger LOGGER = Logger.getLogger(ProductDao.class.getName());
+
   public void create(Product product) throws SQLException {
-    String sql =
-        "INSERT INTO products (category_id, name, price, stock_quantity) VALUES (?, ?, ?, ?)";
-    try (Connection conn =  DatabaseUtils.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    if (product == null) throw new IllegalArgumentException("product must not be null");
+    if (product.getName() == null || product.getName().isBlank()) throw new IllegalArgumentException("product name is required");
+    if (product.getPrice() < 0) throw new IllegalArgumentException("product price must be >= 0");
+    if (product.getStockQuantity() < 0) throw new IllegalArgumentException("stock quantity must be >= 0");
+
+    String sql = "INSERT INTO products (category_id, name, price, stock_quantity) VALUES (?, ?, ?, ?)";
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet generatedKeys = null;
+    boolean previousAutoCommit = true;
+    try {
+      conn = DatabaseUtils.getConnection();
+      previousAutoCommit = conn.getAutoCommit();
+      conn.setAutoCommit(false);
+
+      stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
       if (product.getCategoryId() > 0) {
         stmt.setInt(1, product.getCategoryId());
@@ -26,20 +42,47 @@ public class ProductDao {
       stmt.setDouble(3, product.getPrice());
       stmt.setInt(4, product.getStockQuantity());
 
-      stmt.executeUpdate();
+      int affected = stmt.executeUpdate();
+      if (affected == 0) throw new SQLException("Creating product failed, no rows affected");
 
-      try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-        if (generatedKeys.next()) {
-          product.setProductId(generatedKeys.getInt(1));
+      generatedKeys = stmt.getGeneratedKeys();
+      if (generatedKeys.next()) {
+        product.setProductId(generatedKeys.getInt(1));
+      } else {
+        throw new SQLException("Creating product failed, no ID obtained.");
+      }
+
+      // Portable inventory update: try update, then insert if no row updated
+      String invUpdate = "UPDATE inventory SET quantity_in_stock = ? WHERE product_id = ?";
+      try (PreparedStatement invUpdStmt = conn.prepareStatement(invUpdate)) {
+        invUpdStmt.setInt(1, product.getStockQuantity());
+        invUpdStmt.setInt(2, product.getProductId());
+        int updated = invUpdStmt.executeUpdate();
+        if (updated == 0) {
+          String invInsert = "INSERT INTO inventory (product_id, quantity_in_stock,quantity_reserved) VALUES (?, ?,?)";
+          try (PreparedStatement invInsStmt = conn.prepareStatement(invInsert)) {
+            invInsStmt.setInt(1, product.getProductId());
+            invInsStmt.setInt(2, product.getStockQuantity());
+            invInsStmt.setInt(3, 0); // quantity_reserved default to 0
+            invInsStmt.executeUpdate();
+          }
         }
       }
 
-      // create inventory row as source-of-truth for stock (Postgres upsert)
-      String invSql = "INSERT INTO inventory (product_id, quantity_in_stock) VALUES (?, ?) ON CONFLICT (product_id) DO UPDATE SET quantity_in_stock = EXCLUDED.quantity_in_stock";
-      try (PreparedStatement invStmt = conn.prepareStatement(invSql)) {
-        invStmt.setInt(1, product.getProductId());
-        invStmt.setInt(2, product.getStockQuantity());
-        invStmt.executeUpdate();
+      conn.commit();
+      LOGGER.log(Level.INFO, "Product created id={0} name={1}", new Object[]{product.getProductId(), product.getName()});
+    } catch (SQLException e) {
+      if (conn != null) {
+        try { conn.rollback(); } catch (SQLException ex) { LOGGER.log(Level.SEVERE, "Rollback failed while creating product", ex); }
+      }
+      throw e;
+    } finally {
+      try {
+        if (generatedKeys != null) generatedKeys.close();
+        if (stmt != null) stmt.close();
+        if (conn != null) { conn.setAutoCommit(previousAutoCommit); conn.close(); }
+      } catch (SQLException e) {
+        LOGGER.log(Level.WARNING, "Failed to clean up resources in ProductDao.create", e);
       }
     }
   }

@@ -2,9 +2,11 @@ package com.ecom.controllers;
 
 import com.ecom.models.Product;
 import com.ecom.models.Category;
+import com.ecom.models.User;
 import com.ecom.services.ProductService;
 import com.ecom.services.CartService;
 import com.ecom.dao.CategoryDao;
+import com.ecom.services.SessionService;
 import com.ecom.utils.NavigationUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -40,6 +42,7 @@ public class ProductController {
     private CartService cartService;
     private List<Product> allProducts;
     private Map<Integer, String> categoryMap = new HashMap<>();
+    private SessionService sessionService;
 
     private final int pageSize = 9;
 
@@ -48,7 +51,7 @@ public class ProductController {
         productService = ProductService.getInstance();
         categoryDao = new CategoryDao();
         cartService = CartService.getInstance();
-
+        sessionService  = SessionService.getInstance();
         loadCategories();
         initializeSortOptions();
         initializePagination();
@@ -113,7 +116,7 @@ public class ProductController {
         try {
             NavigationUtils.navigate("cart");
         } catch (IOException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
     }
 
@@ -139,7 +142,7 @@ public class ProductController {
     @FXML
     private void handleOrders() {
         // Navigate to user's orders; require login
-        com.ecom.services.SessionService session = com.ecom.services.SessionService.getInstance();
+        SessionService session = com.ecom.services.SessionService.getInstance();
         if (!session.isLoggedIn()) {
             try {
                 NavigationUtils.navigate("login");
@@ -168,7 +171,7 @@ public class ProductController {
             return;
         }
 
-        cartService.addToCart(product.getProductId(), 1);
+        cartService.addToCart(product, 1);
         updateCartCount();
         showAlert(Alert.AlertType.INFORMATION, "Added to Cart", product.getName() + " added to cart!");
     }
@@ -197,11 +200,14 @@ public class ProductController {
             List<Product> results;
             int total;
 
+
             @Override
             protected Void call() {
                 try {
                     results = productService.search(q, selectedCategory, pageIndex, pageSize, sSortBy, sAsc, true);
                     total = productService.count(q, selectedCategory);
+                    User user = sessionService.getCurrentUser();
+                     cartService.getCartItemsFromDb(user.getUserId());
                 } catch (SQLException ex) {
                     results = List.of();
                     total = 0;
@@ -212,6 +218,7 @@ public class ProductController {
 
             @Override
             protected void succeeded() {
+                updateCartCount();
                 displayProducts(results);
                 int pageCount = Math.max(1, (int) Math.ceil((double) total / pageSize));
                 pagination.setPageCount(pageCount);
@@ -301,8 +308,9 @@ public class ProductController {
     }
 
     private void updateCartCount() {
-        int totalItems = cartService.getTotalItems();
-        cartCountLabel.setText(String.valueOf(totalItems));
+           int totalItems = cartService.getTotalItems();
+           cartCountLabel.setText(String.valueOf(totalItems));
+
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

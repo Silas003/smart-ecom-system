@@ -71,8 +71,6 @@ public class ProductService {
     public long getCacheHits() { return cacheHits; }
     public long getCacheMisses() { return cacheMisses; }
 
-    public int getListCacheSize() { return listCache.size(); }
-    public int getProductCacheSize() { return productCache.size(); }
 
     public int count(String q) throws SQLException {
         return count(q, null);
@@ -107,7 +105,8 @@ public class ProductService {
                 throw new com.ecom.exceptions.DuplicateEntityException("Product with name '" + name + "' already exists");
             }
             productDAO.create(product);
-            invalidateAll();
+            productCache.put((product.getProductId()), product);
+//            invalidateAll();
         } catch (com.ecom.exceptions.DuplicateEntityException de) {
             throw de;
         } catch (SQLException e) {
@@ -128,7 +127,7 @@ public class ProductService {
             }
             productDAO.update(product);
             productCache.put(product.getProductId(), product);
-            invalidateAll();
+//            invalidateAll();
         } catch (com.ecom.exceptions.DuplicateEntityException de) {
             throw de;
         } catch (SQLException e) {
@@ -183,7 +182,5 @@ public class ProductService {
         clearCache();
     }
 
-    public List<Product> getProductsByCategory(int categoryId) throws SQLException {
-        return productDAO.findByCategoryId(categoryId);
-    }
+
 }

@@ -79,6 +79,7 @@ public class LoginController {
                         NavigationUtils.navigate("product");
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
                      showAlert(Alert.AlertType.ERROR, "Error", "Failed to navigate: " + e.getMessage());
 
                 }
