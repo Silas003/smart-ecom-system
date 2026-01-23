@@ -2,6 +2,7 @@ package com.ecom.controllers;
 
 import com.ecom.models.Product;
 import com.ecom.models.Category;
+import com.ecom.models.User;
 import com.ecom.services.ProductService;
 import com.ecom.services.CartService;
 import com.ecom.dao.CategoryDao;
@@ -115,7 +116,7 @@ public class ProductController {
         try {
             NavigationUtils.navigate("cart");
         } catch (IOException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
     }
 
@@ -199,11 +200,14 @@ public class ProductController {
             List<Product> results;
             int total;
 
+
             @Override
             protected Void call() {
                 try {
                     results = productService.search(q, selectedCategory, pageIndex, pageSize, sSortBy, sAsc, true);
                     total = productService.count(q, selectedCategory);
+                    User user = sessionService.getCurrentUser();
+                     cartService.getCartItemsFromDb(user.getUserId());
                 } catch (SQLException ex) {
                     results = List.of();
                     total = 0;
@@ -214,6 +218,7 @@ public class ProductController {
 
             @Override
             protected void succeeded() {
+                updateCartCount();
                 displayProducts(results);
                 int pageCount = Math.max(1, (int) Math.ceil((double) total / pageSize));
                 pagination.setPageCount(pageCount);
@@ -303,8 +308,9 @@ public class ProductController {
     }
 
     private void updateCartCount() {
-        int totalItems = cartService.getTotalItems();
-        cartCountLabel.setText(String.valueOf(totalItems));
+           int totalItems = cartService.getTotalItems();
+           cartCountLabel.setText(String.valueOf(totalItems));
+
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

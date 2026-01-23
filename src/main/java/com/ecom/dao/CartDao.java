@@ -7,27 +7,56 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CartDao {
+    private static final Logger LOGGER = Logger.getLogger(CartDao.class.getName());
 
     public void  createCart(Cart cart) {
-        String sql = "INSERT INTO carts(user_id,status,amount) values(?,?,?)";
-        try(Connection conn = DatabaseUtils.getConnection()) {
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        String sql = "INSERT INTO carts(user_id,status) values(?,?)";
+        try(Connection conn = DatabaseUtils.getConnection();
+            PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setInt(1, cart.getUserId());
             preparedStatement.setString(2, cart.getStatus());
-            preparedStatement.setDouble(3, cart.getAmount());
             int update = preparedStatement.executeUpdate();
             if(update > 0) {
-                System.out.println("Cart created successfully");
+                // retrieve generated id and set it on the model
+                try (ResultSet keys = preparedStatement.getGeneratedKeys()) {
+                    if (keys != null && keys.next()) {
+                        cart.setId(keys.getInt(1));
+                    }
+                }
+                LOGGER.log(Level.INFO, "Cart created successfully with id={0}", cart.getId());
             } else {
-                System.out.println("Failed to create cart");
+                LOGGER.log(Level.WARNING, "Failed to create cart for userId={0}", cart.getUserId());
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    // Transactional variant: uses the provided connection and returns with cart.id populated
+    public void createCart(Connection conn, Cart cart) throws SQLException {
+        String sql = "INSERT INTO carts(user_id,status) values(?,?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, cart.getUserId());
+            ps.setString(2, cart.getStatus());
+            int update = ps.executeUpdate();
+            if (update > 0) {
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys != null && keys.next()) {
+                        cart.setId(keys.getInt(1));
+                    }
+                }
+                LOGGER.log(Level.INFO, "Cart created (tx) with id={0}", cart.getId());
+            } else {
+                throw new SQLException("Failed to create cart");
+            }
+        }
     }
 
     public Cart getCartById(int id) {
@@ -61,18 +90,17 @@ public class CartDao {
     }
 
     public void updateCart(int id, Cart cart) {
-        String sql = "UPDATE carts SET user_id = ?, status = ?, amount = ? WHERE id = ?";
+        String sql = "UPDATE carts SET user_id = ?, status = ?,  WHERE id = ?";
         try(Connection connection = DatabaseUtils.getConnection()){
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, cart.getUserId());
             preparedStatement.setString(2, cart.getStatus());
-            preparedStatement.setDouble(3, cart.getAmount());
-            preparedStatement.setInt(4, id);
+            preparedStatement.setInt(3, id);
             int update = preparedStatement.executeUpdate();
             if(update > 0) {
-                System.out.println("Cart updated successfully");
+                LOGGER.log(Level.INFO, "Cart updated successfully id={0}", id);
             } else {
-                System.out.println("Failed to update cart");
+                LOGGER.log(Level.WARNING, "Failed to update cart id={0}", id);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -86,16 +114,16 @@ public class CartDao {
             preparedStatement.setInt(1, id);
             int update = preparedStatement.executeUpdate();
             if(update > 0) {
-                System.out.println("Cart deleted successfully");
+                LOGGER.log(Level.INFO, "Cart deleted successfully id={0}", id);
             } else {
-                System.out.println("Failed to delete cart");
+                LOGGER.log(Level.WARNING, "Failed to delete cart id={0}", id);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
     public Cart getCartActiveByUserId(int userId) {
-        String sql = "SELECT * FROM carts where user_id = ? and status = 'ACTIVE'";
+        String sql = "SELECT * FROM carts where user_id = ? and status = 'active'";
         try(Connection connection = DatabaseUtils.getConnection()){
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, userId);
@@ -108,15 +136,27 @@ public class CartDao {
         }
         return null;
     }
+
+    // Transactional variant: uses provided connection
+    public Cart getCartActiveByUserId(Connection conn, int userId) throws SQLException {
+        String sql = "SELECT * FROM carts where user_id = ? and status = 'active'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapResultSetToCart(rs);
+                return null;
+            }
+        }
+    }
+
     public static Cart mapResultSetToCart(ResultSet rs) throws SQLException {
         return new Cart(
             rs.getInt("id"),
             rs.getInt("user_id"),
-            rs.getString("status"),
-            rs.getDouble("amount"),
-            rs.getTimestamp("created_at").toLocalDateTime()
+                rs.getString("status")
         );
     }
+
 
 
 }

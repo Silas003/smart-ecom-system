@@ -1,19 +1,20 @@
 package com.ecom.models;
 
-import java.time.LocalDateTime;
-
 public class Cart {
     private int id;
     private int userId;
     private String status;
-    private Double amount;
 
-    public Cart( int userId) {
+
+    public Cart(int userId, String status) {
         this.userId = userId;
-
+        this.status = status;
     }
 
-    public Cart(int id, int userId, String status, double amount, LocalDateTime createdAt) {
+    public Cart(int id,int userId, String status) {
+        this.id = id;
+        this.userId = userId;
+        this.status = status;
     }
 
     public  int getId() {
@@ -38,14 +39,6 @@ public class Cart {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public Double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
-        this.amount = amount;
     }
 
     public void setTotalPrice(double totalPrice) {
